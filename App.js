@@ -5,20 +5,10 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import RegisterScreen from './src/pages/register';
 import LoginScreen from './src/pages/login';
+import HomeScreen from './src/pages/home';
 
 
 
-function HomeScreen({ navigation }) {
-  return (
-    <View style={{ flex: 2, alignItems: 'center', justifyContent: 'center', backgroundColor: '#ffdd33' }}>
-      <Text>Home Screen</Text>
-      <Button
-        title="Go to Profile"
-        onPress={() => navigation.navigate('Profile')}
-      />
-    </View>
-  );
-}
 
 function ProfileScreen() {
   return (
