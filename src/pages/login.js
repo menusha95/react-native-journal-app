@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import {IconButton, Text, TextInput, View, StyleSheet, Button, Alert, TouchableOpacity, KeyboardAvoidingView } from 'react-native';
+import {IconButton, Text, TextInput,Dimensions , View, StyleSheet, ScrollView, Button, Alert, TouchableOpacity, KeyboardAvoidingView } from 'react-native';
 import { useNavigation  } from '@react-navigation/native';
 import firebase from '../../src/database/firebase';
 import AsyncStorage from '@react-native-community/async-storage';
@@ -13,7 +13,9 @@ const LoginScreen = () => {
     const navigation = useNavigation();
     var isEmailValid = false;
     var isPassValid = false;
-    
+    const windowWidth = Dimensions.get('window').width;
+const windowHeight = Dimensions.get('window').height;
+
     const getValueFunction = () => {
         // Function to get the value from AsyncStorage
         var item = AsyncStorage.getItem('uid').then(
@@ -70,13 +72,14 @@ const LoginScreen = () => {
     }
 
     return (
-        
+        <ScrollView keyboardShouldPersistTaps='handled' contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}>
+
         <KeyboardAvoidingView
             behavior={Platform.OS == "ios" ? "padding" : "height"}
             style={{ flex: 1 }} >
                 
-            <View style={{ padding: 25, flex: 4 }}>
-                <View style={{ flex: 1 }}/>
+            <View style={{ padding: 25, flex: 5 }}>
+                <View style={{ flex: 1}}/>
                 <View style={{ flex: 3 }}>
                     <View style={styles.spacing}/>
                     <Text style={styles.textHeader}>
@@ -113,6 +116,7 @@ const LoginScreen = () => {
                 <View style={{ flex: 1 }}></View>
             </View>
         </KeyboardAvoidingView>
+        </ScrollView>
     );
 
 }

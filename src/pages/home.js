@@ -4,8 +4,6 @@ import { useNavigation } from '@react-navigation/native';
 import firebase from '../../src/database/firebase';
 import AsyncStorage from '@react-native-community/async-storage';
 
-
-
 const HomeScreen = () => {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
@@ -25,13 +23,66 @@ const HomeScreen = () => {
         );
     };
 
-    const validates = () => {
+    const addItem = () => {
+        firebase.firestore()
+        .collection('journallist')
+        .add({
+          title: 'Adas Lovelace',
+          description: 'menushaasas',
+          id:'1234sasas',
+          date:'2020-02-20sss'
+        })
+        .then(() => {
+          console.log('User added!');
+        });
+    }
 
+    const getItems = () => {
+        firebase.firestore()
+        .collection('journallist')
+        .get()
+  .then(querySnapshot => {
+    console.log('Total users: ', querySnapshot.size);
+
+    querySnapshot.forEach(documentSnapshot => {
+      console.log('User ID: ', documentSnapshot.id, documentSnapshot.data());
+    });
+  });
     }
 
     const navigateReg = () => {
         navigation.navigate("Register");
     }
+
+    const CustomRow = ({ title, description, image_url }) => (
+        <View style={styles.container}>
+            <Image source={{ uri: image_url }} style={styles.photo} />
+            <View style={styles.container_text}>
+                <Text style={styles.title}>
+                    {title}
+                </Text>
+                <Text style={styles.description}>
+                    {description}
+                </Text>
+            </View>
+    
+        </View>
+    );
+
+    const CustomListview = ({ itemList }) => (
+        <View style={styles.container}>
+            <FlatList
+                    data={itemList}
+                    renderItem={({ item }) => <CustomRow
+                        title={item.title}
+                        description={item.description}
+                        image_url={item.image_url}
+                    />}
+                />
+    
+        </View>
+    );
+
 
     return (
 
@@ -45,8 +96,8 @@ const HomeScreen = () => {
                     <Text style={styles.textHeader}>
                         My journal</Text>
 
-
-
+                        <Button title="add user" onPress={addItem}></Button>
+                        <Button title="get user" onPress={getItems}></Button>
                 </View>
                 <View style={{ flex: 1 }}></View>
             </View>
@@ -55,26 +106,6 @@ const HomeScreen = () => {
 
 }
 
-
-
-const LoginBtn = ({ onPress, title }) => (
-    <TouchableOpacity onPress={onPress} style={styles.buttonContainer}>
-        <Text style={styles.buttonText}>{title}</Text>
-    </TouchableOpacity>
-);
-
-
-const RegisterBtn = ({ onPress, title }) => (
-    <TouchableOpacity onPress={onPress} style={styles.buttonContainer}>
-        <Text style={styles.buttonText}>{title}</Text>
-    </TouchableOpacity>
-);
-
-const ForgotPasswordBtn = ({ onPress, title }) => (
-    <TouchableOpacity onPress={onPress}>
-        <Text style={styles.buttonTextBackNil}>{title}</Text>
-    </TouchableOpacity>
-);
 
 
 const styles = StyleSheet.create({
@@ -127,6 +158,36 @@ const styles = StyleSheet.create({
         color: "#17202A",
         alignSelf: "center",
         justifyContent: 'center'
+    },
+    container: {
+        flex: 1,
+        flexDirection: 'row',
+        padding: 10,
+        marginLeft:16,
+        marginRight:16,
+        marginTop: 8,
+        marginBottom: 8,
+        borderRadius: 5,
+        backgroundColor: '#FFF',
+        elevation: 2,
+    },
+    title: {
+        fontSize: 16,
+        color: '#000',
+    },
+    container_text: {
+        flex: 1,
+        flexDirection: 'column',
+        marginLeft: 12,
+        justifyContent: 'center',
+    },
+    description: {
+        fontSize: 11,
+        fontStyle: 'italic',
+    },
+    photo: {
+        height: 50,
+        width: 50,
     },
 });
 

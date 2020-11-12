@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Text, TextInput, View, StyleSheet, Button, Alert,ActivityIndicator , TouchableOpacity,KeyboardAvoidingView,Image   } from 'react-native';
+import { Text, TextInput, View, StyleSheet,Dimensions, Button,ScrollView, Alert,ActivityIndicator , TouchableOpacity,KeyboardAvoidingView,Image   } from 'react-native';
 import { useNavigation  } from '@react-navigation/native';
 import {Asset} from 'expo-asset';
 import firebase from '../../src/database/firebase';
@@ -14,7 +14,9 @@ const RegisterScreen = () => {
     var isNameValid = false;
     var isEmailValid = false;
     var isPassValid = false;
-
+    var isPassValid = false;
+    const windowWidth = Dimensions.get('window').width;
+    const windowHeight = Dimensions.get('window').height;
 
 
     const navigateReg = () => {
@@ -45,7 +47,11 @@ const RegisterScreen = () => {
             Alert.alert('Password required', 'Please enter your password!');
             return;
         }else{
-            isPassValid = true;
+            if(password.length < 6){
+                Alert.alert('Password too short!', 'Please enter a password more than 6 letters');
+            }else{
+                isPassValid = true;
+            }
         }
 
         if(isNameValid && isEmailValid && isPassValid){
@@ -60,21 +66,23 @@ const RegisterScreen = () => {
              
               navigation.navigate("Login");
             })
-            .catch(error => { errorMessage: error.message })   
+            .catch(error => { errorMessage:Alert.alert('Error!', error.message);
+            })   
         }
         //Do your stuff if condition meet.
     }
 
  
     return (
-        
+        <ScrollView keyboardShouldPersistTaps='handled' contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}>
+
         <KeyboardAvoidingView 
         behavior={Platform.OS == "ios" ? "padding" : "height"}
       style={{flex:1}}
         >
          
            
-        <View style={{ padding: 25,flex:4 }}>
+        <View style={{ padding: 25,flex:5}}>
             <View style={{ flex: 1 }}>
             <BackBtn onPress={navigateReg}/>
 
@@ -116,6 +124,7 @@ const RegisterScreen = () => {
             <View style={{ flex: 1 }}></View>
         </View>
         </KeyboardAvoidingView>
+        </ScrollView>
     );
 
 }
