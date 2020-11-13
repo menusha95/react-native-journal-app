@@ -1,16 +1,55 @@
-import React, { useState } from 'react';
-import { IconButton, Text, TextInput, View, StyleSheet, Button, Alert, TouchableOpacity, KeyboardAvoidingView } from 'react-native';
+import React, { useState, useRef, useEffect } from 'react';
+import { IconButton, FlatList, ActivityIndicator, Text, Animated, Keyboard, TextInput, ScrollView, View, StyleSheet, Button, Image, Alert, TouchableOpacity, KeyboardAvoidingView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import firebase from '../../src/database/firebase';
 import AsyncStorage from '@react-native-community/async-storage';
 
 const HomeScreen = () => {
-    const [name, setName] = useState('');
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+    const [title, setTitle] = useState('');
+    const [description, setDesc] = useState('');
+    const [isEditClick, setisEditClick] = useState(false);
+    const [currentDate, setCurrentDate] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [users, setUsers] = useState([]); // Initial empty array of users
+
+    useEffect(() => {
+        var date = new Date().getDate(); //Current Date
+        var month = new Date().getMonth() + 1; //Current Month
+        var year = new Date().getFullYear(); //Current Year
+
+        setCurrentDate(
+            year + '-' + month + '-' + date
+
+        );
+
+        if (loading) {
+            return <ActivityIndicator />;
+        }
+
+        getUserFire();
+       
+    }, []);
+
+    const getUserFire = () => {
+        firebase.firestore()
+        .collection('journallist')
+        .get()
+        .then(querySnapshot => {
+            const users = [];
+            querySnapshot.forEach(documentSnapshot => {
+                users.push({
+                    ...documentSnapshot.data(),
+                    key: documentSnapshot.title,
+                });
+            });
+            setUsers(users);
+            setLoading(false);
+
+        });
+
+    }
+
     const navigation = useNavigation();
-    var isEmailValid = false;
-    var isPassValid = false;
 
     const getValueFunction = () => {
         // Function to get the value from AsyncStorage
@@ -25,88 +64,164 @@ const HomeScreen = () => {
 
     const addItem = () => {
         firebase.firestore()
-        .collection('journallist')
-        .add({
-          title: 'Adas Lovelace',
-          description: 'menushaasas',
-          id:'1234sasas',
-          date:'2020-02-20sss'
-        })
-        .then(() => {
-          console.log('User added!');
-        });
+            .collection('journallist')
+            .add({
+                title: title,
+                description: description,
+                date: currentDate
+            })
+            .then(() => {
+                setTitle('');
+                setDesc('');
+                setisEditClick(false);
+                getUserFire();
+                Alert.alert(title, 'Successfully saved!');
+            });
     }
 
-    const getItems = () => {
-        firebase.firestore()
-        .collection('journallist')
-        .get()
-  .then(querySnapshot => {
-    console.log('Total users: ', querySnapshot.size);
-
-    querySnapshot.forEach(documentSnapshot => {
-      console.log('User ID: ', documentSnapshot.id, documentSnapshot.data());
-    });
-  });
-    }
 
     const navigateReg = () => {
         navigation.navigate("Register");
     }
 
-    const CustomRow = ({ title, description, image_url }) => (
-        <View style={styles.container}>
-            <Image source={{ uri: image_url }} style={styles.photo} />
-            <View style={styles.container_text}>
-                <Text style={styles.title}>
-                    {title}
-                </Text>
-                <Text style={styles.description}>
-                    {description}
-                </Text>
-            </View>
-    
-        </View>
-    );
+    const addTojournalBtn = () => {
+        isAddToJournalBtnClick = true;
+    }
 
-    const CustomListview = ({ itemList }) => (
-        <View style={styles.container}>
-            <FlatList
-                    data={itemList}
-                    renderItem={({ item }) => <CustomRow
-                        title={item.title}
-                        description={item.description}
-                        image_url={item.image_url}
-                    />}
-                />
-    
-        </View>
-    );
+    const closeEdit = () => {
+        setisEditClick(false);
 
+    }
+    const openEdit = () => {
+        setisEditClick(true);
+
+    }
 
     return (
+        <ScrollView keyboardShouldPersistTaps='handled' contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}>
 
-        <KeyboardAvoidingView
-            behavior={Platform.OS == "ios" ? "padding" : "height"}
-            style={{ flex: 1 }} >
+            <KeyboardAvoidingView
+                behavior={Platform.OS == "ios" ? "padding" : "height"}
+                style={{ flex: 1 }} >
 
-            <View style={{ padding: 25, flex: 4 }}>
-                <View style={{ flex: 3 }}>
-                    <View style={styles.spacing} />
-                    <Text style={styles.textHeader}>
-                        My journal</Text>
+                <View style={{ padding: 25, flex: 4 }}>
+                    <View style={{ flex: 3 }}>
+                        <View style={styles.spacing} />
+                        <Text style={styles.textHeader}>
+                            My journal</Text>
+                        <View style={styles.spacing} />
 
-                        <Button title="add user" onPress={addItem}></Button>
-                        <Button title="get user" onPress={getItems}></Button>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                            <Text style={styles.text}>Add items to journal</Text>
+                            {isEditClick ? (
+                                <CloseBtn onPress={closeEdit} />
+
+                            ) : (
+                                    <>
+                                        <EditBtn onPress={openEdit} />
+                                    </>
+                                )}
+
+                        </View>
+
+                        <View style={styles.spacing} />
+
+                        {!isEditClick ? (
+                            <View />
+                        ) : (
+                                <>
+                                    <FadeInView style={{ flex: 1 }}>
+                                        <Text style={styles.textDate}>{currentDate}</Text>
+                                        <View style={styles.spacing} />
+
+                                        <TextInput
+                                            style={styles.textInput}
+                                            placeholder="Title"
+                                            onChangeText={title => setTitle(title)}
+                                            defaultValue={title}
+                                        />
+                                        <View style={styles.spacing} />
+
+                                        <TextInput
+                                            style={styles.textInputMultiline}
+                                            placeholder="Start Writing.."
+                                            multiline={true}
+                                            onChangeText={description => setDesc(description)}
+                                            defaultValue={description}
+                                        />
+                                        <View style={styles.spacing} />
+
+                                        <AddToJournalBtn title="Add to journal" onPress={addItem} />
+                                    </FadeInView>
+
+                                </>
+                            )}
+                        <FlatList
+                            data={users}
+                            renderItem={({ item }) => (
+                                <View style={{ height: 50, flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+                                    <Text>title: {item.title}</Text>
+                                    <Text>description: {item.description}</Text>
+                                </View>
+                            )}
+                        />
+
+                    </View>
+                    <View style={{ flex: 1 }}></View>
                 </View>
-                <View style={{ flex: 1 }}></View>
-            </View>
-        </KeyboardAvoidingView>
+            </KeyboardAvoidingView>
+        </ScrollView>
     );
 
 }
 
+const FadeInView = (props) => {
+    const fadeAnim = useRef(new Animated.Value(0)).current  // Initial value for opacity: 0
 
+    React.useEffect(() => {
+        Animated.timing(
+            fadeAnim,
+            {
+                toValue: 1,
+                duration: 300,
+                useNativeDriver: true
+            }
+        ).start();
+    }, [fadeAnim])
+
+    return (
+        <Animated.View                 // Special animatable View
+            style={{
+                ...props.style,
+                opacity: fadeAnim,         // Bind opacity to animated value
+            }}
+        >
+            {props.children}
+        </Animated.View>
+    );
+}
+
+const AddToJournalBtn = ({ onPress, title }) => (
+    <TouchableOpacity onPress={onPress} style={styles.buttonContainer}>
+        <Text style={styles.buttonText}>{title}</Text>
+    </TouchableOpacity>
+);
+
+const EditBtn = ({ onPress }) => (
+    <TouchableOpacity onPress={onPress}>
+        <View >
+            <Image style={styles.backBtn} source={require('../../assets/edit_icon.png')} />
+        </View>
+    </TouchableOpacity>
+);
+
+const CloseBtn = ({ onPress }) => (
+    <TouchableOpacity onPress={onPress}>
+        <View >
+            <Image style={styles.backBtn} source={require('../../assets/close_icon.png')} />
+        </View>
+    </TouchableOpacity>
+);
 
 const styles = StyleSheet.create({
     textInput: {
@@ -116,6 +231,15 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         padding: 10,
         fontSize: 16
+    },
+    textInputMultiline: {
+        height: 50,
+        borderColor: '#BFC9CA',
+        borderWidth: 1,
+        borderRadius: 8,
+        padding: 10,
+        fontSize: 16,
+        height: 100
     },
     textHeader: {
         fontSize: 35,
@@ -133,6 +257,10 @@ const styles = StyleSheet.create({
         height: 50,
         justifyContent: 'center'
     },
+    backBtn: {
+        width: 40,
+        height: 40
+    },
     buttonText: {
         fontSize: 16,
         color: "#ffffff",
@@ -148,10 +276,15 @@ const styles = StyleSheet.create({
         justifyContent: 'center'
     },
     text: {
-        fontSize: 14,
+        fontSize: 20,
         color: "#17202A",
         alignSelf: "center",
         justifyContent: 'center'
+    },
+    textDate: {
+        fontSize: 18,
+        color: "#17202A",
+        fontWeight: 'bold'
     },
     buttonTextBackNil: {
         fontSize: 14,
@@ -163,8 +296,8 @@ const styles = StyleSheet.create({
         flex: 1,
         flexDirection: 'row',
         padding: 10,
-        marginLeft:16,
-        marginRight:16,
+        marginLeft: 16,
+        marginRight: 16,
         marginTop: 8,
         marginBottom: 8,
         borderRadius: 5,
