@@ -11,14 +11,16 @@ const HomeScreen = () => {
     const [currentDate, setCurrentDate] = useState('');
     const [loading, setLoading] = useState(false);
     const [users, setUsers] = useState([]); // Initial empty array of users
-
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+  ];
     useEffect(() => {
         var date = new Date().getDate(); //Current Date
-        var month = new Date().getMonth() + 1; //Current Month
+        var month = new Date().getMonth(); //Current Month
         var year = new Date().getFullYear(); //Current Year
 
         setCurrentDate(
-            year + '-' + month + '-' + date
+            year + ' ' + monthNames[month] + ' ' + date
 
         );
 
@@ -96,6 +98,12 @@ const HomeScreen = () => {
         setisEditClick(true);
 
     }
+   
+    const getDataJournal = (item) =>{
+        var title = item.title;
+        var description = item.description;
+        Alert.alert(title,description);
+    }
 
     return (
         <ScrollView keyboardShouldPersistTaps='handled' contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}>
@@ -152,6 +160,8 @@ const HomeScreen = () => {
                                         <View style={styles.spacing} />
 
                                         <AddToJournalBtn title="Add to journal" onPress={addItem} />
+                                        <View style={styles.spacing} />
+
                                     </FadeInView>
 
                                 </>
@@ -159,11 +169,15 @@ const HomeScreen = () => {
                         <FlatList
                             data={users}
                             renderItem={({ item }) => (
-                                <View style={{ height: 50, flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-                                    <Text>title: {item.title}</Text>
-                                    <Text>description: {item.description}</Text>
+                                <TouchableOpacity style={styles.cellContainer} onPress={getDataJournal.bind(this,item)}>
+                                <View  style={{ height: 60, flex: 1,padding:10 }}>
+                                    <Text style={styles.cellText} >{item.title}</Text>
                                 </View>
+                                </TouchableOpacity>
                             )}
+                            keyExtractor={(item) => console.log("HIIII",item.title)}
+                            ItemSeparatorComponent = {ItemSeprator}
+
                         />
 
                     </View>
@@ -174,6 +188,10 @@ const HomeScreen = () => {
     );
 
 }
+const getListViewItem = (item) => {  
+    Alert.alert(item.title, 'Successfully saved!')
+}  
+
 
 const FadeInView = (props) => {
     const fadeAnim = useRef(new Animated.Value(0)).current  // Initial value for opacity: 0
@@ -206,6 +224,14 @@ const AddToJournalBtn = ({ onPress, title }) => (
         <Text style={styles.buttonText}>{title}</Text>
     </TouchableOpacity>
 );
+
+
+const ItemSeprator = () => <View style={{
+    height: 7,
+    width: "100%",
+    backgroundColor:'transparent'
+  }} />
+
 
 const EditBtn = ({ onPress }) => (
     <TouchableOpacity onPress={onPress}>
@@ -256,6 +282,17 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         height: 50,
         justifyContent: 'center'
+    },
+    cellContainer: {
+        elevation: 8,
+        backgroundColor: "#17202A",
+        borderRadius: 10,
+        height: 100,
+    },
+    cellText: {
+        fontSize: 28,
+        color: "#ffffff",
+        fontWeight: "bold",
     },
     backBtn: {
         width: 40,
