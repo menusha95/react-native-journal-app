@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import { Text, TextInput, View, StyleSheet,Dimensions, Button,ScrollView, Alert,ActivityIndicator , TouchableOpacity,KeyboardAvoidingView,Image   } from 'react-native';
 import { useNavigation  } from '@react-navigation/native';
 import {Asset} from 'expo-asset';
 import firebase from '../../src/database/firebase';
 import Spinner from 'react-native-loading-spinner-overlay';
+import * as Network from 'expo-network';
 
 
 
@@ -19,13 +20,29 @@ const RegisterScreen = () => {
     const windowWidth = Dimensions.get('window').width;
     const windowHeight = Dimensions.get('window').height;
     const [loading, setLoading] = useState(false);
+    const [isConnected, setIsConnected] = useState(false);
 
+
+    useEffect(() => {
+        const unsubscribe = navigation.addListener('focus', () => {
+            checkInternet();
+        });
+
+        return unsubscribe;
+
+    }, [navigation]);
 
     const navigateReg = () => {
         navigation.navigate("Login");
     }
 
+    const checkInternet = async()=>{
+        await Network.getNetworkStateAsync();
+        setIsConnected((await Network.getNetworkStateAsync()).isConnected);
+      }
+
     const validates = () => {
+
         if (!name.trim()) {
             Alert.alert('Name required', 'Please enter your name!');
             return;
@@ -55,27 +72,34 @@ const RegisterScreen = () => {
                 isPassValid = true;
             }
         }
+        if(isConnected){
+            if(isNameValid && isEmailValid && isPassValid){
+                setLoading(true);
+                firebase
+                .auth()
+                .createUserWithEmailAndPassword(email, password)
+                .then((res) => {
+                  res.user.updateProfile({
+                    name: name
+                  })
+                  setLoading(false);
+    
+                  setTimeout(() => {
+                    Alert.alert('Registration successful!', 'Please Login');
+                    navigation.navigate("Login");
+    
+                  }, 2000);
+                })
+                .catch(error => { errorMessage:Alert.alert('Error!', error.message);
+                })   
+            }
+        }else{
+            Alert.alert("No connection!","Please connect to a working internet connection");
+            navigation.navigate("Splash");
 
-        if(isNameValid && isEmailValid && isPassValid){
-            setLoading(true);
-            firebase
-            .auth()
-            .createUserWithEmailAndPassword(email, password)
-            .then((res) => {
-              res.user.updateProfile({
-                name: name
-              })
-              setLoading(false);
-
-              setTimeout(() => {
-                Alert.alert('Registration successful!', 'Please Login');
-                navigation.navigate("Login");
-
-              }, 2000);
-            })
-            .catch(error => { errorMessage:Alert.alert('Error!', error.message);
-            })   
         }
+
+      
         //Do your stuff if condition meet.
     }
 

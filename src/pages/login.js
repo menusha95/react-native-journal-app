@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState ,useEffect} from 'react';
 import {IconButton, Text, TextInput,Dimensions , View, StyleSheet, ScrollView, Button, Alert, TouchableOpacity, KeyboardAvoidingView } from 'react-native';
 import { useNavigation  } from '@react-navigation/native';
 import firebase from '../../src/database/firebase';
 import AsyncStorage from '@react-native-community/async-storage';
 import Spinner from 'react-native-loading-spinner-overlay';
+import * as Network from 'expo-network';
 
 
 
@@ -17,6 +18,7 @@ const LoginScreen = () => {
     const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 const [loading, setLoading] = useState(false);
+const [isConnected, setIsConnected] = useState(false);
 
     const getValueFunction = () => {
         // Function to get the value from AsyncStorage
@@ -29,8 +31,21 @@ const [loading, setLoading] = useState(false);
           );
       };
 
-    const validates = () => {
+      useEffect(() => {
+        const unsubscribe = navigation.addListener('focus', () => {
+            checkInternet();
+        });
 
+        return unsubscribe;
+
+    }, [navigation]);
+
+      const checkInternet = async()=>{
+        await Network.getNetworkStateAsync();
+        setIsConnected((await Network.getNetworkStateAsync()).isConnected);
+      }
+
+    const validates = () => {
         if (!email.trim()) {
             Alert.alert('Email required', 'Please enter your email!');
             return;
@@ -50,28 +65,35 @@ const [loading, setLoading] = useState(false);
             isPassValid = true;
         }
 
-        if(isEmailValid && isPassValid){
-            setLoading(true);
-            firebase
-            .auth()
-            .signInWithEmailAndPassword(email, password)
-            .then((res) => {
-                var uid = JSON.stringify(res.user.uid);
-                AsyncStorage.setItem('uid', uid);
-                setLoading(false);
+        if(isConnected){
+            if(isEmailValid && isPassValid){
+                setLoading(true);
+                firebase
+                .auth()
+                .signInWithEmailAndPassword(email, password)
+                .then((res) => {
+                    var uid = JSON.stringify(res.user.uid);
+                    AsyncStorage.setItem('uid', uid);
+                    setLoading(false);
+    
+                  Alert.alert('Login Successful!', "Start using your journal")
+                  navigation.navigate("Home");
+                })
+                .catch(error => { errorMessage:
+                    setLoading(false);
+    
+                    setTimeout(() => {
+                        Alert.alert('Error!', error.message);
+    
+                      }, 700);
+                     })
+            }
+        }else{
+            Alert.alert("No connection!","Please connect to a working internet connection");
+            navigation.navigate("Splash");
 
-              Alert.alert('Login Successful!', "Start using your journal")
-              navigation.navigate("Home");
-            })
-            .catch(error => { errorMessage:
-                setLoading(false);
-
-                setTimeout(() => {
-                    Alert.alert('Error!', error.message);
-
-                  }, 700);
-                 })
         }
+        
 
         //Do your stuff if condition meet.
     }

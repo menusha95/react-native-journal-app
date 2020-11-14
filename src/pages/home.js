@@ -4,6 +4,7 @@ import { useNavigation, useIsFocused } from '@react-navigation/native';
 import firebase from '../../src/database/firebase';
 import AsyncStorage from '@react-native-community/async-storage';
 import Spinner from 'react-native-loading-spinner-overlay';
+import * as Network from 'expo-network';
 
 const HomeScreen = ({ route }) => {
     const navigation = useNavigation();
@@ -18,8 +19,14 @@ const HomeScreen = ({ route }) => {
         "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
     const [loading, setLoading] = useState(false);
+    var isTitleValid = false;
+    var isDescValid = false;
+    const [isConnected, setIsConnected] = useState(false);
 
-   
+    const checkInternet = async()=>{
+        await Network.getNetworkStateAsync();
+        setIsConnected((await Network.getNetworkStateAsync()).isConnected);
+      }
 
 
 
@@ -30,16 +37,14 @@ const HomeScreen = ({ route }) => {
 
         const unsubscribe = navigation.addListener('focus', () => {
             getUserFire();
+            checkInternet();
+
         });
 
         setCurrentDate(
             year + ' ' + monthNames[month] + ' ' + date
 
         );
-
-
-
-
 
         return unsubscribe;
 
@@ -80,20 +85,50 @@ const HomeScreen = ({ route }) => {
     };
 
     const addItem = () => {
-        setLoading(true);
-        firebase.firestore()
-            .collection('journallist')
-            .add({
-                title: title,
-                description: description,
-                date: currentDate
-            })
-            .then(() => {
-                setTitle('');
-                setDesc('');
-                setisEditClick(false);
-                getUserFire();
-            });
+
+        if (!title.trim()) {
+            Alert.alert('Title required', 'Please enter a title!');
+            return;
+        }else{
+            isTitleValid = true;
+        }
+
+        if (!description.trim()) {
+            Alert.alert('Description required', 'Please enter a description!');
+            return;
+        }else{
+            isDescValid = true;
+        }
+
+        if(isConnected){
+            setLoading(true);
+
+            if(isTitleValid && isDescValid){
+                firebase.firestore()
+                .collection('journallist')
+                .add({
+                    title: title,
+                    description: description,
+                    date: currentDate
+                })
+                .then(() => {
+                    setTitle('');
+                    setDesc('');
+                    setLoading(false);
+                    setisEditClick(false);
+                    getUserFire();
+                });
+            }
+        }else{
+            setLoading(false);
+
+            Alert.alert("No connection!","Please connect to a working internet connection");
+            navigation.navigate("Splash");
+
+        }
+
+
+       
     }
 
 
@@ -138,7 +173,7 @@ const HomeScreen = ({ route }) => {
     }
 
     return (
-        <ScrollView nestedScrollEnabled='true' keyboardShouldPersistTaps='handled' contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}>
+        <ScrollView nestedScrollEnabled={true} keyboardShouldPersistTaps='handled' contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}>
 
             <KeyboardAvoidingView
                 behavior={Platform.OS == "ios" ? "padding" : "height"}

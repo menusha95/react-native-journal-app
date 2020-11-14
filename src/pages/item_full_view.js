@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import { Text, TextInput, View, StyleSheet, Dimensions, Button, ScrollView, Alert, ActivityIndicator, TouchableOpacity, KeyboardAvoidingView, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Asset } from 'expo-asset';
 import firebase from '../database/firebase';
 import Spinner from 'react-native-loading-spinner-overlay';
+import * as Network from 'expo-network';
 
 
 
@@ -17,15 +18,31 @@ const ItemScreen = ({ route }) => {
     const windowWidth = Dimensions.get('window').width;
     const windowHeight = Dimensions.get('window').height;
     const [loading, setLoading] = useState(false);
+    const [isConnected, setIsConnected] = useState(false);
+
+    useEffect(() => {
+        const unsubscribe = navigation.addListener('focus', () => {
+            checkInternet();
+        });
+
+        return unsubscribe;
+
+    }, [navigation]);
 
     const navigateHome = () => {
         navigation.navigate("Home");
     }
 
+    
+    const checkInternet = async()=>{
+        await Network.getNetworkStateAsync();
+        setIsConnected((await Network.getNetworkStateAsync()).isConnected);
+      }
 
     const deleteItem = () => {
         setLoading(true)
-        firebase.firestore()
+        if(isConnected){
+            firebase.firestore()
             .collection('journallist')
             .doc(key)
             .delete()
@@ -38,6 +55,11 @@ const ItemScreen = ({ route }) => {
 
                   }, 2000);
             });
+        }else{
+            setLoading(false)
+
+        }
+       
 
     }
 
