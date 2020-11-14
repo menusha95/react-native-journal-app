@@ -1,10 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { IconButton, FlatList, ActivityIndicator, Text, Animated, Keyboard, TextInput, ScrollView, View, StyleSheet, Button, Image, Alert, TouchableOpacity, KeyboardAvoidingView } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation,useIsFocused   } from '@react-navigation/native';
 import firebase from '../../src/database/firebase';
 import AsyncStorage from '@react-native-community/async-storage';
 
-const HomeScreen = () => {
+const HomeScreen = ({route}) => {
+    const navigation = useNavigation();
+    const isFocused = useIsFocused();
+
     const [title, setTitle] = useState('');
     const [description, setDesc] = useState('');
     const [isEditClick, setisEditClick] = useState(false);
@@ -12,12 +15,20 @@ const HomeScreen = () => {
     const [loading, setLoading] = useState(false);
     const [users, setUsers] = useState([]); // Initial empty array of users
     const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
-    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
-  ];
+    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+   
+
+   
+    
     useEffect(() => {
         var date = new Date().getDate(); //Current Date
         var month = new Date().getMonth(); //Current Month
         var year = new Date().getFullYear(); //Current Year
+
+        const unsubscribe = navigation.addListener('focus', () => {
+            getUserFire();
+          });
 
         setCurrentDate(
             year + ' ' + monthNames[month] + ' ' + date
@@ -28,9 +39,15 @@ const HomeScreen = () => {
             return <ActivityIndicator />;
         }
 
-        getUserFire();
-       
-    }, []);
+
+      
+
+        
+        return unsubscribe;
+
+    }, [navigation]);
+
+    
 
     const getUserFire = () => {
         firebase.firestore()
@@ -41,17 +58,17 @@ const HomeScreen = () => {
             querySnapshot.forEach(documentSnapshot => {
                 users.push({
                     ...documentSnapshot.data(),
-                    key: documentSnapshot.title,
+                    key: documentSnapshot.id,
                 });
             });
             setUsers(users);
             setLoading(false);
 
         });
+        console.log(users);
 
     }
 
-    const navigation = useNavigation();
 
     const getValueFunction = () => {
         // Function to get the value from AsyncStorage
@@ -82,9 +99,7 @@ const HomeScreen = () => {
     }
 
 
-    const navigateReg = () => {
-        navigation.navigate("Register");
-    }
+
 
     const addTojournalBtn = () => {
         isAddToJournalBtnClick = true;
@@ -102,11 +117,17 @@ const HomeScreen = () => {
     const getDataJournal = (item) =>{
         var title = item.title;
         var description = item.description;
-        Alert.alert(title,description);
+        navigation.navigate("Item",{
+            item:item
+        });
+    }
+
+    const navigateItem = () => {
+        
     }
 
     return (
-        <ScrollView keyboardShouldPersistTaps='handled' contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}>
+        <ScrollView nestedScrollEnabled='true' keyboardShouldPersistTaps='handled' contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}>
 
             <KeyboardAvoidingView
                 behavior={Platform.OS == "ios" ? "padding" : "height"}
@@ -170,8 +191,9 @@ const HomeScreen = () => {
                             data={users}
                             renderItem={({ item }) => (
                                 <TouchableOpacity style={styles.cellContainer} onPress={getDataJournal.bind(this,item)}>
-                                <View  style={{ height: 60, flex: 1,padding:10 }}>
+                                <View  style={{ height: 60, flex: 1,padding:10 ,justifyContent: 'center'}}>
                                     <Text style={styles.cellText} >{item.title}</Text>
+                                    <Text style={styles.cellTextDate} >{item.date}</Text>
                                 </View>
                                 </TouchableOpacity>
                             )}
@@ -293,6 +315,11 @@ const styles = StyleSheet.create({
         fontSize: 28,
         color: "#ffffff",
         fontWeight: "bold",
+    },
+    cellTextDate: {
+        fontSize: 16,
+        color: "#ffffff",
+        fontWeight: "300",
     },
     backBtn: {
         width: 40,

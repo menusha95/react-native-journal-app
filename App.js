@@ -6,6 +6,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import RegisterScreen from './src/pages/register';
 import LoginScreen from './src/pages/login';
 import HomeScreen from './src/pages/home';
+import ItemScreen from './src/pages/item_full_view';
 
 
 
@@ -30,6 +31,7 @@ function App() {
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="Register" component={RegisterScreen} />
         <Stack.Screen name="Profile" component={ProfileScreen} />
+        <Stack.Screen name="Item" component={ItemScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
