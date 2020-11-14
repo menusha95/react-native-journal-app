@@ -3,6 +3,7 @@ import { Text, TextInput, View, StyleSheet,Dimensions, Button,ScrollView, Alert,
 import { useNavigation  } from '@react-navigation/native';
 import {Asset} from 'expo-asset';
 import firebase from '../../src/database/firebase';
+import Spinner from 'react-native-loading-spinner-overlay';
 
 
 
@@ -17,6 +18,7 @@ const RegisterScreen = () => {
     var isPassValid = false;
     const windowWidth = Dimensions.get('window').width;
     const windowHeight = Dimensions.get('window').height;
+    const [loading, setLoading] = useState(false);
 
 
     const navigateReg = () => {
@@ -55,6 +57,7 @@ const RegisterScreen = () => {
         }
 
         if(isNameValid && isEmailValid && isPassValid){
+            setLoading(true);
             firebase
             .auth()
             .createUserWithEmailAndPassword(email, password)
@@ -62,9 +65,13 @@ const RegisterScreen = () => {
               res.user.updateProfile({
                 name: name
               })
-              Alert.alert('Registration successful!', 'Please Login');
-             
-              navigation.navigate("Login");
+              setLoading(false);
+
+              setTimeout(() => {
+                Alert.alert('Registration successful!', 'Please Login');
+                navigation.navigate("Login");
+
+              }, 2000);
             })
             .catch(error => { errorMessage:Alert.alert('Error!', error.message);
             })   
@@ -81,7 +88,10 @@ const RegisterScreen = () => {
       style={{flex:1}}
         >
          
-           
+         <Spinner
+                color='#17202A'
+                    visible={loading}
+                />
         <View style={{ padding: 25,flex:5}}>
             <View style={{ flex: 1 }}>
             <BackBtn onPress={navigateReg}/>

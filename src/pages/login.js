@@ -3,6 +3,7 @@ import {IconButton, Text, TextInput,Dimensions , View, StyleSheet, ScrollView, B
 import { useNavigation  } from '@react-navigation/native';
 import firebase from '../../src/database/firebase';
 import AsyncStorage from '@react-native-community/async-storage';
+import Spinner from 'react-native-loading-spinner-overlay';
 
 
 
@@ -15,6 +16,7 @@ const LoginScreen = () => {
     var isPassValid = false;
     const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
+const [loading, setLoading] = useState(false);
 
     const getValueFunction = () => {
         // Function to get the value from AsyncStorage
@@ -49,18 +51,25 @@ const windowHeight = Dimensions.get('window').height;
         }
 
         if(isEmailValid && isPassValid){
+            setLoading(true);
             firebase
             .auth()
             .signInWithEmailAndPassword(email, password)
             .then((res) => {
                 var uid = JSON.stringify(res.user.uid);
                 AsyncStorage.setItem('uid', uid);
+                setLoading(false);
 
               Alert.alert('Login Successful!', "Start using your journal")
               navigation.navigate("Home");
             })
-            .catch(error => { errorMessage: Alert.alert('Error!', error.message);
+            .catch(error => { errorMessage:
+                setLoading(false);
 
+                setTimeout(() => {
+                    Alert.alert('Error!', error.message);
+
+                  }, 700);
                  })
         }
 
@@ -115,6 +124,10 @@ const windowHeight = Dimensions.get('window').height;
                 </View>
                 <View style={{ flex: 1 }}></View>
             </View>
+            <Spinner
+                color='#17202A'
+                    visible={loading}
+                />
         </KeyboardAvoidingView>
         </ScrollView>
     );

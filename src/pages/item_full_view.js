@@ -3,6 +3,7 @@ import { Text, TextInput, View, StyleSheet, Dimensions, Button, ScrollView, Aler
 import { useNavigation } from '@react-navigation/native';
 import { Asset } from 'expo-asset';
 import firebase from '../database/firebase';
+import Spinner from 'react-native-loading-spinner-overlay';
 
 
 
@@ -15,7 +16,7 @@ const ItemScreen = ({ route }) => {
     var key = route.params.item.key;
     const windowWidth = Dimensions.get('window').width;
     const windowHeight = Dimensions.get('window').height;
-    console.log( route.params.item);
+    const [loading, setLoading] = useState(false);
 
     const navigateHome = () => {
         navigation.navigate("Home");
@@ -23,13 +24,19 @@ const ItemScreen = ({ route }) => {
 
 
     const deleteItem = () => {
+        setLoading(true)
         firebase.firestore()
             .collection('journallist')
             .doc(key)
             .delete()
             .then(() => {
                 Alert.alert("Record deleted!", 'Record successfully deleted!');
-                navigateHome()
+
+                setTimeout(() => {
+                    navigateHome()
+                    setLoading(false)
+
+                  }, 2000);
             });
 
     }
@@ -42,7 +49,10 @@ const ItemScreen = ({ route }) => {
                 behavior={Platform.OS == "ios" ? "padding" : "height"}
                 style={{ flex: 1 }}
             >
-
+  <Spinner
+                color='#17202A'
+                    visible={loading}
+                />
                 <View style={{ padding: 25, flex: 5 }}>
                     <View style={{ flex: 1 }}>
                         <BackBtn onPress={navigateHome} />

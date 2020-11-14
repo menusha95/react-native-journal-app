@@ -1,10 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { IconButton, FlatList, ActivityIndicator, Text, Animated, Keyboard, TextInput, ScrollView, View, StyleSheet, Button, Image, Alert, TouchableOpacity, KeyboardAvoidingView } from 'react-native';
-import { useNavigation,useIsFocused   } from '@react-navigation/native';
+import { useNavigation, useIsFocused } from '@react-navigation/native';
 import firebase from '../../src/database/firebase';
 import AsyncStorage from '@react-native-community/async-storage';
+import Spinner from 'react-native-loading-spinner-overlay';
 
-const HomeScreen = ({route}) => {
+const HomeScreen = ({ route }) => {
     const navigation = useNavigation();
     const isFocused = useIsFocused();
 
@@ -12,15 +13,16 @@ const HomeScreen = ({route}) => {
     const [description, setDesc] = useState('');
     const [isEditClick, setisEditClick] = useState(false);
     const [currentDate, setCurrentDate] = useState('');
-    const [loading, setLoading] = useState(false);
     const [users, setUsers] = useState([]); // Initial empty array of users
     const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
-    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+    const [loading, setLoading] = useState(false);
 
    
 
-   
-    
+
+
     useEffect(() => {
         var date = new Date().getDate(); //Current Date
         var month = new Date().getMonth(); //Current Month
@@ -28,43 +30,39 @@ const HomeScreen = ({route}) => {
 
         const unsubscribe = navigation.addListener('focus', () => {
             getUserFire();
-          });
+        });
 
         setCurrentDate(
             year + ' ' + monthNames[month] + ' ' + date
 
         );
 
-        if (loading) {
-            return <ActivityIndicator />;
-        }
 
 
-      
 
-        
+
         return unsubscribe;
 
     }, [navigation]);
 
-    
+
 
     const getUserFire = () => {
         firebase.firestore()
-        .collection('journallist')
-        .get()
-        .then(querySnapshot => {
-            const users = [];
-            querySnapshot.forEach(documentSnapshot => {
-                users.push({
-                    ...documentSnapshot.data(),
-                    key: documentSnapshot.id,
+            .collection('journallist')
+            .get()
+            .then(querySnapshot => {
+                const users = [];
+                querySnapshot.forEach(documentSnapshot => {
+                    users.push({
+                        ...documentSnapshot.data(),
+                        key: documentSnapshot.id,
+                    });
                 });
-            });
-            setUsers(users);
-            setLoading(false);
+                setUsers(users);
+                setLoading(false);
 
-        });
+            });
         console.log(users);
 
     }
@@ -82,6 +80,7 @@ const HomeScreen = ({route}) => {
     };
 
     const addItem = () => {
+        setLoading(true);
         firebase.firestore()
             .collection('journallist')
             .add({
@@ -94,7 +93,6 @@ const HomeScreen = ({route}) => {
                 setDesc('');
                 setisEditClick(false);
                 getUserFire();
-                Alert.alert(title, 'Successfully saved!');
             });
     }
 
@@ -113,17 +111,30 @@ const HomeScreen = ({route}) => {
         setisEditClick(true);
 
     }
-   
-    const getDataJournal = (item) =>{
+    const logOutClick = () => {
+        navigateItem();
+    }
+
+    const getDataJournal = (item) => {
         var title = item.title;
         var description = item.description;
-        navigation.navigate("Item",{
-            item:item
+        navigation.navigate("Item", {
+            item: item
         });
     }
 
-    const navigateItem = () => {
-        
+    const navigateItem = async () => {
+        setLoading(true);
+        try {
+            setLoading(false);
+            await AsyncStorage.removeItem('uid');
+            navigation.navigate("Splash");
+
+            return true;
+        }
+        catch (exception) {
+            return false;
+        }
     }
 
     return (
@@ -132,12 +143,21 @@ const HomeScreen = ({route}) => {
             <KeyboardAvoidingView
                 behavior={Platform.OS == "ios" ? "padding" : "height"}
                 style={{ flex: 1 }} >
-
+                <Spinner
+                color='#17202A'
+                    visible={loading}
+                />
                 <View style={{ padding: 25, flex: 4 }}>
                     <View style={{ flex: 3 }}>
                         <View style={styles.spacing} />
-                        <Text style={styles.textHeader}>
-                            My journal</Text>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                            <Text style={styles.textHeader}>
+                                My journal</Text>
+
+                            <LogoutBtn onPress={logOutClick} />
+                        </View>
+
+
                         <View style={styles.spacing} />
 
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
@@ -190,15 +210,17 @@ const HomeScreen = ({route}) => {
                         <FlatList
                             data={users}
                             renderItem={({ item }) => (
-                                <TouchableOpacity style={styles.cellContainer} onPress={getDataJournal.bind(this,item)}>
-                                <View  style={{ height: 60, flex: 1,padding:10 ,justifyContent: 'center'}}>
-                                    <Text style={styles.cellText} >{item.title}</Text>
-                                    <Text style={styles.cellTextDate} >{item.date}</Text>
-                                </View>
+                                <TouchableOpacity style={styles.cellContainer} onPress={getDataJournal.bind(this, item)}>
+                                    <View style={{ height: 60, flex: 1, padding: 10, justifyContent: 'center' }}>
+                                        <Text style={styles.cellText} >{item.title}</Text>
+                                        <Text style={styles.cellTextDate} >{item.date}</Text>
+                                    </View>
                                 </TouchableOpacity>
                             )}
-                            keyExtractor={(item) => console.log("HIIII",item.title)}
-                            ItemSeparatorComponent = {ItemSeprator}
+                            keyExtractor={(item, index) => {
+                                return item.key;
+                            }}
+                            ItemSeparatorComponent={ItemSeprator}
 
                         />
 
@@ -210,9 +232,9 @@ const HomeScreen = ({route}) => {
     );
 
 }
-const getListViewItem = (item) => {  
+const getListViewItem = (item) => {
     Alert.alert(item.title, 'Successfully saved!')
-}  
+}
 
 
 const FadeInView = (props) => {
@@ -251,8 +273,8 @@ const AddToJournalBtn = ({ onPress, title }) => (
 const ItemSeprator = () => <View style={{
     height: 7,
     width: "100%",
-    backgroundColor:'transparent'
-  }} />
+    backgroundColor: 'transparent'
+}} />
 
 
 const EditBtn = ({ onPress }) => (
@@ -263,12 +285,25 @@ const EditBtn = ({ onPress }) => (
     </TouchableOpacity>
 );
 
+const LogoutBtn = ({ onPress }) => (
+    <TouchableOpacity onPress={onPress}>
+        <View >
+            <Image style={styles.backBtn} source={require('../../assets/log_out_icon.png')} />
+        </View>
+    </TouchableOpacity>
+);
+
 const CloseBtn = ({ onPress }) => (
     <TouchableOpacity onPress={onPress}>
         <View >
             <Image style={styles.backBtn} source={require('../../assets/close_icon.png')} />
         </View>
     </TouchableOpacity>
+);
+const Indicator = () => (
+    <Overlay>
+        <ActivityIndicator size="small" color="#17202A" />
+    </Overlay>
 );
 
 const styles = StyleSheet.create({
@@ -372,6 +407,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: '#000',
     },
+   
     container_text: {
         flex: 1,
         flexDirection: 'column',

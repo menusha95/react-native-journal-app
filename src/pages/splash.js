@@ -1,92 +1,62 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import { Text, TextInput, View, StyleSheet, Dimensions, Button, ScrollView, Alert, ActivityIndicator, TouchableOpacity, KeyboardAvoidingView, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Asset } from 'expo-asset';
 import firebase from '../database/firebase';
+import AsyncStorage from '@react-native-community/async-storage';
 
 
 
-const ItemScreen = ({ route }) => {
-
-    const navigation = useNavigation();
-    var title = route.params.item.title;
-    var description = route.params.item.description;
-    var date = route.params.item.date;
-    var key = route.params.item.key;
+const SplashScreen = ({ route }) => {
     const windowWidth = Dimensions.get('window').width;
     const windowHeight = Dimensions.get('window').height;
-    console.log( route.params.item);
+    const navigation = useNavigation();
 
     const navigateHome = () => {
         navigation.navigate("Home");
     }
 
-
-    const deleteItem = () => {
-        firebase.firestore()
-            .collection('journallist')
-            .doc(key)
-            .delete()
-            .then(() => {
-                Alert.alert("Record deleted!", 'Record successfully deleted!');
-                navigateHome()
-            });
-
+    const getValueFunction = () => {
+        // Function to get the value from AsyncStorage
+        AsyncStorage.getItem('uid').then(
+            (value) =>
+                {
+                    setTimeout(() => {
+                        if(value == null){
+                            navigation.navigate("Login"); 
+                        }else{
+                            navigation.navigate("Home"); 
+                        }
+                      }, 3000);
+                    
+                }
+          
+        );
     }
 
+    useEffect(() => {
+     
+        const unsubscribe = navigation.addListener('focus', () => {
+            getValueFunction();
+          });
+
+        return unsubscribe;
+
+    }, [navigation]);
 
     return (
-        <ScrollView keyboardShouldPersistTaps='handled' contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}>
-
-            <KeyboardAvoidingView
-                behavior={Platform.OS == "ios" ? "padding" : "height"}
-                style={{ flex: 1 }}
-            >
-
-                <View style={{ padding: 25, flex: 5 }}>
-                    <View style={{ flex: 1 }}>
-                        <BackBtn onPress={navigateHome} />
-                        <View style={styles.spacing} />
-                        <View style={styles.spacing} />
-
-                        <Text style={styles.cellTextDate}> {date}  </Text>
-                        <View style={styles.spacing} />
-
-                        <Text style={styles.cellText}> {title}  </Text>
-                        <View style={styles.spacing} />
-
-                        <Text style={styles.cellDesc}> {description}  </Text>
-                        <View style={styles.spacing} />
-                        <View style={styles.spacing} />
-
-                        <DeleteBtn title="Delete record" onPress={deleteItem}></DeleteBtn>
+       
+                <View style={{ height:windowHeight, width:windowWidth, justifyContent: 'center',
+                alignSelf: "center"}}>
+                   <Text style={styles.textHeader}>My {"\n"}Journal</Text>
 
                     </View>
-                </View>
-
-            </KeyboardAvoidingView>
-        </ScrollView>
+            
     );
 
 }
 
 
-
-
-const BackBtn = ({ onPress }) => (
-    <TouchableOpacity onPress={onPress}>
-        <View >
-            <Image style={styles.backBtn} source={require('../../assets/back_click.png')} />
-        </View>
-    </TouchableOpacity>
-);
-
-
-const DeleteBtn = ({ onPress, title }) => (
-    <TouchableOpacity onPress={onPress} style={styles.buttonContainer}>
-        <Text style={styles.buttonText}>{title}</Text>
-    </TouchableOpacity>
-);
 
 const styles = StyleSheet.create({
     textInput: {
@@ -98,9 +68,12 @@ const styles = StyleSheet.create({
         fontSize: 16
     },
     textHeader: {
-        fontSize: 35,
+        fontSize: 50,
         fontWeight: "bold",
-        color: '#17202A'
+        color: '#17202A',
+        justifyContent: 'center',
+        alignSelf: "center"
+        
     },
     spacing: {
         backgroundColor: 'transparent',
@@ -151,4 +124,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default ItemScreen;
+export default SplashScreen;
