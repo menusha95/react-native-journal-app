@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Text, TextInput, View, StyleSheet,Modal,TouchableHighlight, Dimensions, Button, ScrollView, Alert, ActivityIndicator, TouchableOpacity, KeyboardAvoidingView, Image } from 'react-native';
+import { Text, TextInput, View, StyleSheet,Modal,TouchableHighlight,  ScrollView, TouchableOpacity, KeyboardAvoidingView, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { Asset } from 'expo-asset';
 import firebase from '../database/firebase';
 import Spinner from 'react-native-loading-spinner-overlay';
 import * as Network from 'expo-network';
@@ -63,7 +62,7 @@ const ItemScreen = ({ route }) => {
                             .delete()
                             .then(() => {
                                 setLoading(false);
-                                openAlert(true,'Record deleted!','#00e600');
+                                openAlert(true,'Item deleted!','#00e600');
 
                                 // Alert.alert("Record deleted!", 'Record successfully deleted!');
 
@@ -97,7 +96,7 @@ const ItemScreen = ({ route }) => {
                             )
                             .then(() => {
                                 setLoading(false)
-                                openAlert(true,'Record updated!','#00e600');
+                                openAlert(true,'Item updated!','#00e600');
 
                              
                             });
@@ -109,7 +108,7 @@ const ItemScreen = ({ route }) => {
             setLoading(false)
         }
     }
-
+    //function to custom alert
     const ModalView = ({modalVisible,title}) => (
     
         <View style={styles.centeredView}>
@@ -182,10 +181,10 @@ const ItemScreen = ({ route }) => {
                         <View style={styles.spacing} />
                         <View style={styles.spacing} />
                         <View style={{ flexDirection: 'row', justifyContent:'space-evenly'}}>
-                        <DeleteBtn title="Delete record" onPress={deleteItem}></DeleteBtn>
+                        <DeleteBtn title="Delete Item" onPress={deleteItem}></DeleteBtn>
                         <View style={styles.spacing} />
 
-                        <UpdateBtn title="Update record" onPress={editItem}></UpdateBtn>
+                        <UpdateBtn title="Update Item" onPress={editItem}></UpdateBtn>
 
                             </View>
                         <View style={styles.spacing} />

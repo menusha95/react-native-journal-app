@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Text, TextInput, View, StyleSheet,Modal,TouchableHighlight,Dimensions, Button, ScrollView, Alert, ActivityIndicator, TouchableOpacity, KeyboardAvoidingView, Image } from 'react-native';
+import { Text, TextInput, View, StyleSheet,Modal,TouchableHighlight, ScrollView, TouchableOpacity, KeyboardAvoidingView, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { Asset } from 'expo-asset';
 import firebase from '../../src/database/firebase';
 import Spinner from 'react-native-loading-spinner-overlay';
 import * as Network from 'expo-network';
@@ -113,9 +112,9 @@ const RegisterScreen = () => {
         }
 
 
-        //Do your stuff if condition meet.
     }
 
+     //function to custom alert
     const ModalView = ({modalVisible,title}) => (
     
         <View style={styles.centeredView}>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { IconButton, Text, TextInput, Modal, TouchableHighlight, Dimensions, View, StyleSheet, ScrollView, Button, Alert, TouchableOpacity, KeyboardAvoidingView } from 'react-native';
+import { Text, TextInput, Modal, TouchableHighlight, View, StyleSheet, ScrollView, Alert, TouchableOpacity, KeyboardAvoidingView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import firebase from '../../src/database/firebase';
 import AsyncStorage from '@react-native-community/async-storage';
@@ -103,6 +103,7 @@ const LoginScreen = () => {
         navigation.navigate("Register");
     }
 
+     //function to custom alert
     const ModalView = ({ modalVisible, title }) => (
 
         <View style={styles.centeredView}>

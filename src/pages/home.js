@@ -1,8 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { IconButton, FlatList,Modal,TouchableHighlight, ActivityIndicator, Text, Animated, Keyboard, TextInput, ScrollView, View, StyleSheet, Button, Image, Alert, TouchableOpacity, KeyboardAvoidingView } from 'react-native';
-import { useNavigation, useIsFocused } from '@react-navigation/native';
+import {  FlatList,Modal,TouchableHighlight, Text, Animated, TextInput, View, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import firebase from '../../src/database/firebase';
-import CustomAlert from '../../src/pages/customAlert';
 import AsyncStorage from '@react-native-community/async-storage';
 import Spinner from 'react-native-loading-spinner-overlay';
 import * as Network from 'expo-network';
@@ -230,7 +229,7 @@ const HomeScreen = () => {
                                     />
                                     <View style={styles.spacing} />
 
-                                    <AddToJournalBtn title="Add to journal" onPress={addItem} />
+                                    <AddToJournalBtn title="Add to Journal" onPress={addItem} />
 
                                 </FadeInView>
 
@@ -242,7 +241,7 @@ const HomeScreen = () => {
         </View>
     };
 
-    
+ //function to custom alert
 const ModalView = ({modalVisible,title}) => (
     
     <View style={styles.centeredView}>
