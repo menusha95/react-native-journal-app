@@ -20,6 +20,7 @@ const HomeScreen = () => {
     var isTitleValid = false;
     var isDescValid = false;
     const [isConnected, setIsConnected] = useState(false);
+    const [userId, setUserId] = useState('');
 
     //check for internet connection
     const checkInternet = async () => {
@@ -31,7 +32,6 @@ const HomeScreen = () => {
         var date = new Date().getDate();
         var month = new Date().getMonth();
         var year = new Date().getFullYear();
-
         const unsubscribe = navigation.addListener('focus', () => {
             checkInternet();
             getUserFire();
@@ -48,23 +48,30 @@ const HomeScreen = () => {
 
     //get items from firestore databse
     const getUserFire = () => {
-        firebase.firestore()
-            .collection('journallist')
-            .get()
-            .then(querySnapshot => {
-                const users = [];
-                querySnapshot.forEach(documentSnapshot => {
-                    //adding items to users array
-                    users.push({
-                        ...documentSnapshot.data(),
-                        key: documentSnapshot.id,
+        AsyncStorage.getItem('uid').then(
+            (value) => {
+               setUserId(value)
+               
+              setTimeout(() => {
+                firebase.firestore()
+                .collection(value)
+                .get()
+                .then(querySnapshot => {
+                    const users = [];
+                    querySnapshot.forEach(documentSnapshot => {
+                        //adding items to users array
+                        users.push({
+                            ...documentSnapshot.data(),
+                            key: documentSnapshot.id,
+                        });
                     });
-                });
-                setUsers(users);
-                setLoading(false);
-
-            });
-
+                    setUsers(users);
+                    setLoading(false);
+    
+                },2000);
+              })
+            }
+        );
     }
 
     //adding an item to the firestore databse
@@ -89,7 +96,7 @@ const HomeScreen = () => {
 
             if (isTitleValid && isDescValid) {
                 firebase.firestore()
-                    .collection('journallist')
+                    .collection(userId)
                     .add({
                         title: title,
                         description: description,

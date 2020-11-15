@@ -62,7 +62,7 @@ const LoginScreen = () => {
                     .auth()
                     .signInWithEmailAndPassword(email, password)
                     .then((res) => {
-                        var uid = JSON.stringify(res.user.uid);
+                        var uid = res.user.uid;
                         AsyncStorage.setItem('uid', uid);
                         setLoading(false);
 

@@ -5,6 +5,7 @@ import { Asset } from 'expo-asset';
 import firebase from '../database/firebase';
 import Spinner from 'react-native-loading-spinner-overlay';
 import * as Network from 'expo-network';
+import AsyncStorage from '@react-native-community/async-storage';
 
 
 
@@ -17,6 +18,7 @@ const ItemScreen = ({ route }) => {
     var key = route.params.item.key;
     const [loading, setLoading] = useState(false);
     const [isConnected, setIsConnected] = useState(false);
+    const [userId, setUserId] = useState('');
 
     useEffect(() => {
         const unsubscribe = navigation.addListener('focus', () => {
@@ -41,19 +43,28 @@ const ItemScreen = ({ route }) => {
     const deleteItem = () => {
         setLoading(true)
         if (isConnected) {
-            firebase.firestore()
-                .collection('journallist')
-                .doc(key)
-                .delete()
-                .then(() => {
-                    Alert.alert("Record deleted!", 'Record successfully deleted!');
+            AsyncStorage.getItem('uid').then(
+                (value) => {
+                    setUserId(value)
 
                     setTimeout(() => {
-                        navigateHome()
-                        setLoading(false)
+                        firebase.firestore()
+                            .collection(value)
+                            .doc(key)
+                            .delete()
+                            .then(() => {
+                                Alert.alert("Record deleted!", 'Record successfully deleted!');
 
-                    }, 2000);
-                });
+                                setTimeout(() => {
+                                    navigateHome()
+                                    setLoading(false)
+
+                                }, 2000);
+                            });
+                    })
+                }
+            );
+
         } else {
             setLoading(false)
         }
@@ -82,7 +93,7 @@ const ItemScreen = ({ route }) => {
 
                         <Text style={styles.cellText}> {title}  </Text>
                         <View style={styles.spacing} />
-                        
+
                         <Text style={styles.cellDesc}> {description}  </Text>
                         <View style={styles.spacing} />
                         <View style={styles.spacing} />
