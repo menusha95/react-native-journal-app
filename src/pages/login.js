@@ -28,11 +28,13 @@ const LoginScreen = () => {
 
     }, [navigation]);
 
+    //check for internet connection
     const checkInternet = async () => {
         await Network.getNetworkStateAsync();
         setIsConnected((await Network.getNetworkStateAsync()).isConnected);
     }
 
+    //validation for text input fields
     const validates = () => {
         if (!email.trim()) {
             Alert.alert('Email required', 'Please enter your email!');
@@ -82,9 +84,6 @@ const LoginScreen = () => {
             navigation.navigate("Splash");
 
         }
-
-
-        //Do your stuff if condition meet.
     }
 
     const navigateReg = () => {
@@ -93,7 +92,6 @@ const LoginScreen = () => {
 
     return (
         <ScrollView keyboardShouldPersistTaps='handled' contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}>
-
             <KeyboardAvoidingView
                 behavior={Platform.OS == "ios" ? "padding" : "height"}
                 style={{ flex: 1 }} >
@@ -143,8 +141,6 @@ const LoginScreen = () => {
     );
 
 }
-
-
 
 const LoginBtn = ({ onPress, title }) => (
     <TouchableOpacity onPress={onPress} style={styles.buttonContainer}>

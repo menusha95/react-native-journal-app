@@ -37,6 +37,7 @@ const ItemScreen = ({ route }) => {
         setIsConnected((await Network.getNetworkStateAsync()).isConnected);
     }
 
+    //function to delete an item from firestore database
     const deleteItem = () => {
         setLoading(true)
         if (isConnected) {
@@ -55,10 +56,7 @@ const ItemScreen = ({ route }) => {
                 });
         } else {
             setLoading(false)
-
         }
-
-
     }
 
 
@@ -84,16 +82,13 @@ const ItemScreen = ({ route }) => {
 
                         <Text style={styles.cellText}> {title}  </Text>
                         <View style={styles.spacing} />
-
+                        
                         <Text style={styles.cellDesc}> {description}  </Text>
                         <View style={styles.spacing} />
                         <View style={styles.spacing} />
-
                         <DeleteBtn title="Delete record" onPress={deleteItem}></DeleteBtn>
-
                     </View>
                 </View>
-
             </KeyboardAvoidingView>
         </ScrollView>
     );

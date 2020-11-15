@@ -32,11 +32,13 @@ const RegisterScreen = () => {
         navigation.navigate("Login");
     }
 
+    //check for internet connection
     const checkInternet = async () => {
         await Network.getNetworkStateAsync();
         setIsConnected((await Network.getNetworkStateAsync()).isConnected);
     }
-
+    
+    //validation for text input fields
     const validates = () => {
 
         if (!name.trim()) {

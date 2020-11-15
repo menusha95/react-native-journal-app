@@ -10,10 +10,9 @@ const SplashScreen = () => {
     const windowHeight = Dimensions.get('window').height;
     const navigation = useNavigation();
 
-
-
+    //funciton to check if the uid of the user is available
     const getValueFunction = () => {
-        // Function to get the value from AsyncStorage
+        // function to get the value from AsyncStorage
         AsyncStorage.getItem('uid').then(
             (value) => {
                 setTimeout(() => {

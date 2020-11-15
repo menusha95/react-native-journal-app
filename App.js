@@ -12,6 +12,7 @@ import SplashScreen from './src/pages/splash';
 
 const Stack = createStackNavigator();
 
+//stacks used for navigation 
 function App() {
   return (
     <NavigationContainer>

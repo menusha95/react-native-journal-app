@@ -21,6 +21,7 @@ const HomeScreen = () => {
     var isDescValid = false;
     const [isConnected, setIsConnected] = useState(false);
 
+    //check for internet connection
     const checkInternet = async () => {
         await Network.getNetworkStateAsync();
         setIsConnected((await Network.getNetworkStateAsync()).isConnected);
@@ -35,6 +36,7 @@ const HomeScreen = () => {
             checkInternet();
             getUserFire();
         });
+        //get current date 
         setCurrentDate(
             year + ' ' + monthNames[month] + ' ' + date
 
@@ -44,7 +46,7 @@ const HomeScreen = () => {
     }, [navigation]);
 
 
-
+    //get items from firestore databse
     const getUserFire = () => {
         firebase.firestore()
             .collection('journallist')
@@ -52,6 +54,7 @@ const HomeScreen = () => {
             .then(querySnapshot => {
                 const users = [];
                 querySnapshot.forEach(documentSnapshot => {
+                    //adding items to users array
                     users.push({
                         ...documentSnapshot.data(),
                         key: documentSnapshot.id,
@@ -61,10 +64,10 @@ const HomeScreen = () => {
                 setLoading(false);
 
             });
-        console.log(users);
 
     }
 
+    //adding an item to the firestore databse
     const addItem = () => {
 
         if (!title.trim()) {
@@ -102,32 +105,32 @@ const HomeScreen = () => {
             }
         } else {
             setLoading(false);
-
             Alert.alert("No connection!", "Please connect to a working internet connection");
             navigation.navigate("Splash");
-
         }
     }
-
 
     const closeEdit = () => {
         setisEditClick(false);
 
     }
+
     const openEdit = () => {
         setisEditClick(true);
-
     }
+
     const logOutClick = () => {
         navigateItem();
     }
 
+    //function to navigate to full view with the item object
     const getDataJournal = (item) => {
         navigation.navigate("Item", {
             item: item
         });
     }
 
+    //logout funtion
     const navigateItem = async () => {
         setLoading(true);
         try {
@@ -164,9 +167,10 @@ const HomeScreen = () => {
 
 
                         <View style={styles.spacing} />
-
+                        
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                             <Text style={styles.text}>Add items to journal</Text>
+                            
                             {isEditClick ? (
                                 <CloseBtn onPress={closeEdit} />
 
@@ -238,7 +242,7 @@ const HomeScreen = () => {
 
 }
 
-
+//function to animate input view
 const FadeInView = (props) => {
     const fadeAnim = useRef(new Animated.Value(0)).current  // Initial value for opacity: 0
 
