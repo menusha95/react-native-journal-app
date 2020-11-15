@@ -6,10 +6,8 @@ import AsyncStorage from '@react-native-community/async-storage';
 import Spinner from 'react-native-loading-spinner-overlay';
 import * as Network from 'expo-network';
 
-const HomeScreen = ({ route }) => {
+const HomeScreen = () => {
     const navigation = useNavigation();
-    const isFocused = useIsFocused();
-
     const [title, setTitle] = useState('');
     const [description, setDesc] = useState('');
     const [isEditClick, setisEditClick] = useState(false);
@@ -23,29 +21,24 @@ const HomeScreen = ({ route }) => {
     var isDescValid = false;
     const [isConnected, setIsConnected] = useState(false);
 
-    const checkInternet = async()=>{
+    const checkInternet = async () => {
         await Network.getNetworkStateAsync();
         setIsConnected((await Network.getNetworkStateAsync()).isConnected);
-      }
-
-
+    }
 
     useEffect(() => {
-        var date = new Date().getDate(); //Current Date
-        var month = new Date().getMonth(); //Current Month
-        var year = new Date().getFullYear(); //Current Year
+        var date = new Date().getDate();
+        var month = new Date().getMonth();
+        var year = new Date().getFullYear();
 
         const unsubscribe = navigation.addListener('focus', () => {
-            getUserFire();
             checkInternet();
-
+            getUserFire();
         });
-
         setCurrentDate(
             year + ' ' + monthNames[month] + ' ' + date
 
         );
-
         return unsubscribe;
 
     }, [navigation]);
@@ -72,71 +65,50 @@ const HomeScreen = ({ route }) => {
 
     }
 
-
-    const getValueFunction = () => {
-        // Function to get the value from AsyncStorage
-        var item = AsyncStorage.getItem('uid').then(
-            (value) =>
-                // AsyncStorage returns a promise
-                // Adding a callback to get the value
-                console.log("ITEM===>", value)
-            // Setting the value in Text
-        );
-    };
-
     const addItem = () => {
 
         if (!title.trim()) {
             Alert.alert('Title required', 'Please enter a title!');
             return;
-        }else{
+        } else {
             isTitleValid = true;
         }
 
         if (!description.trim()) {
             Alert.alert('Description required', 'Please enter a description!');
             return;
-        }else{
+        } else {
             isDescValid = true;
         }
 
-        if(isConnected){
+        if (isConnected) {
             setLoading(true);
 
-            if(isTitleValid && isDescValid){
+            if (isTitleValid && isDescValid) {
                 firebase.firestore()
-                .collection('journallist')
-                .add({
-                    title: title,
-                    description: description,
-                    date: currentDate
-                })
-                .then(() => {
-                    setTitle('');
-                    setDesc('');
-                    setLoading(false);
-                    setisEditClick(false);
-                    getUserFire();
-                });
+                    .collection('journallist')
+                    .add({
+                        title: title,
+                        description: description,
+                        date: currentDate
+                    })
+                    .then(() => {
+                        setTitle('');
+                        setDesc('');
+                        setLoading(false);
+                        setisEditClick(false);
+                        getUserFire();
+                    });
             }
-        }else{
+        } else {
             setLoading(false);
 
-            Alert.alert("No connection!","Please connect to a working internet connection");
+            Alert.alert("No connection!", "Please connect to a working internet connection");
             navigation.navigate("Splash");
 
         }
-
-
-       
     }
 
-
-
-
-    const addTojournalBtn = () => {
-        isAddToJournalBtnClick = true;
-    }
 
     const closeEdit = () => {
         setisEditClick(false);
@@ -151,8 +123,6 @@ const HomeScreen = ({ route }) => {
     }
 
     const getDataJournal = (item) => {
-        var title = item.title;
-        var description = item.description;
         navigation.navigate("Item", {
             item: item
         });
@@ -179,7 +149,7 @@ const HomeScreen = ({ route }) => {
                 behavior={Platform.OS == "ios" ? "padding" : "height"}
                 style={{ flex: 1 }} >
                 <Spinner
-                color='#17202A'
+                    color='#17202A'
                     visible={loading}
                 />
                 <View style={{ padding: 25, flex: 4 }}>
@@ -267,9 +237,6 @@ const HomeScreen = ({ route }) => {
     );
 
 }
-const getListViewItem = (item) => {
-    Alert.alert(item.title, 'Successfully saved!')
-}
 
 
 const FadeInView = (props) => {
@@ -335,11 +302,7 @@ const CloseBtn = ({ onPress }) => (
         </View>
     </TouchableOpacity>
 );
-const Indicator = () => (
-    <Overlay>
-        <ActivityIndicator size="small" color="#17202A" />
-    </Overlay>
-);
+
 
 const styles = StyleSheet.create({
     textInput: {
@@ -402,13 +365,6 @@ const styles = StyleSheet.create({
         alignSelf: "center",
         justifyContent: 'center'
     },
-    button: {
-        fontSize: 11,
-        color: "#ffffff",
-        fontWeight: "bold",
-        alignSelf: "center",
-        justifyContent: 'center'
-    },
     text: {
         fontSize: 20,
         color: "#17202A",
@@ -420,12 +376,7 @@ const styles = StyleSheet.create({
         color: "#17202A",
         fontWeight: 'bold'
     },
-    buttonTextBackNil: {
-        fontSize: 14,
-        color: "#17202A",
-        alignSelf: "center",
-        justifyContent: 'center'
-    },
+
     container: {
         flex: 1,
         flexDirection: 'row',
@@ -438,25 +389,9 @@ const styles = StyleSheet.create({
         backgroundColor: '#FFF',
         elevation: 2,
     },
-    title: {
-        fontSize: 16,
-        color: '#000',
-    },
-   
-    container_text: {
-        flex: 1,
-        flexDirection: 'column',
-        marginLeft: 12,
-        justifyContent: 'center',
-    },
-    description: {
-        fontSize: 11,
-        fontStyle: 'italic',
-    },
-    photo: {
-        height: 50,
-        width: 50,
-    },
+
+
+
 });
 
 export default HomeScreen;

@@ -1,4 +1,4 @@
-import React, { useState,useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Text, TextInput, View, StyleSheet, Dimensions, Button, ScrollView, Alert, ActivityIndicator, TouchableOpacity, KeyboardAvoidingView, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Asset } from 'expo-asset';
@@ -15,8 +15,6 @@ const ItemScreen = ({ route }) => {
     var description = route.params.item.description;
     var date = route.params.item.date;
     var key = route.params.item.key;
-    const windowWidth = Dimensions.get('window').width;
-    const windowHeight = Dimensions.get('window').height;
     const [loading, setLoading] = useState(false);
     const [isConnected, setIsConnected] = useState(false);
 
@@ -33,33 +31,33 @@ const ItemScreen = ({ route }) => {
         navigation.navigate("Home");
     }
 
-    
-    const checkInternet = async()=>{
+
+    const checkInternet = async () => {
         await Network.getNetworkStateAsync();
         setIsConnected((await Network.getNetworkStateAsync()).isConnected);
-      }
+    }
 
     const deleteItem = () => {
         setLoading(true)
-        if(isConnected){
+        if (isConnected) {
             firebase.firestore()
-            .collection('journallist')
-            .doc(key)
-            .delete()
-            .then(() => {
-                Alert.alert("Record deleted!", 'Record successfully deleted!');
+                .collection('journallist')
+                .doc(key)
+                .delete()
+                .then(() => {
+                    Alert.alert("Record deleted!", 'Record successfully deleted!');
 
-                setTimeout(() => {
-                    navigateHome()
-                    setLoading(false)
+                    setTimeout(() => {
+                        navigateHome()
+                        setLoading(false)
 
-                  }, 2000);
-            });
-        }else{
+                    }, 2000);
+                });
+        } else {
             setLoading(false)
 
         }
-       
+
 
     }
 
@@ -71,8 +69,8 @@ const ItemScreen = ({ route }) => {
                 behavior={Platform.OS == "ios" ? "padding" : "height"}
                 style={{ flex: 1 }}
             >
-  <Spinner
-                color='#17202A'
+                <Spinner
+                    color='#17202A'
                     visible={loading}
                 />
                 <View style={{ padding: 25, flex: 5 }}>
@@ -103,8 +101,6 @@ const ItemScreen = ({ route }) => {
 }
 
 
-
-
 const BackBtn = ({ onPress }) => (
     <TouchableOpacity onPress={onPress}>
         <View >
@@ -121,19 +117,7 @@ const DeleteBtn = ({ onPress, title }) => (
 );
 
 const styles = StyleSheet.create({
-    textInput: {
-        height: 50,
-        borderColor: '#BFC9CA',
-        borderWidth: 1,
-        borderRadius: 8,
-        padding: 10,
-        fontSize: 16
-    },
-    textHeader: {
-        fontSize: 35,
-        fontWeight: "bold",
-        color: '#17202A'
-    },
+
     spacing: {
         backgroundColor: 'transparent',
         padding: 10
@@ -155,16 +139,6 @@ const styles = StyleSheet.create({
     backBtn: {
         width: 40,
         height: 40
-    },
-    preloader: {
-        left: 0,
-        right: 0,
-        top: 0,
-        bottom: 0,
-        position: 'absolute',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: '#fff'
     },
     cellText: {
         fontSize: 28,
