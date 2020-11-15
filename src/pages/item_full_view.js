@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Text, TextInput, View, StyleSheet, Dimensions, Button, ScrollView, Alert, ActivityIndicator, TouchableOpacity, KeyboardAvoidingView, Image } from 'react-native';
+import { Text, TextInput, View, StyleSheet,Modal,TouchableHighlight, Dimensions, Button, ScrollView, Alert, ActivityIndicator, TouchableOpacity, KeyboardAvoidingView, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Asset } from 'expo-asset';
 import firebase from '../database/firebase';
@@ -20,7 +20,9 @@ const ItemScreen = ({ route }) => {
     const [userId, setUserId] = useState('');
     const [title, setTitle] = useState(route.params.item.title);
     const [description, setDesc] = useState(route.params.item.description);
-
+    const [titleAlert, setTitleAlert] = useState('');
+    const [colorHeader, setColorHeader] = useState('');
+    const [modalVisible, setModalVisible] = useState(false);
     useEffect(() => {
         const unsubscribe = navigation.addListener('focus', () => {
             checkInternet();
@@ -32,6 +34,12 @@ const ItemScreen = ({ route }) => {
 
     const navigateHome = () => {
         navigation.navigate("Home");
+    }
+
+    const openAlert = (open,title,color) =>{
+        setModalVisible(open);
+            setTitleAlert(title);
+            setColorHeader(color)
     }
 
 
@@ -54,15 +62,14 @@ const ItemScreen = ({ route }) => {
                             .doc(key)
                             .delete()
                             .then(() => {
-                                Alert.alert("Record deleted!", 'Record successfully deleted!');
+                                setLoading(false);
+                                openAlert(true,'Record deleted!','#00e600');
 
-                                setTimeout(() => {
-                                    navigateHome()
-                                    setLoading(false)
+                                // Alert.alert("Record deleted!", 'Record successfully deleted!');
 
-                                }, 2000);
+                               
                             });
-                    })
+                    },2000)
                 }
             );
 
@@ -89,15 +96,12 @@ const ItemScreen = ({ route }) => {
                                 }
                             )
                             .then(() => {
-                                Alert.alert("Record updated!", 'Record successfully updated!');
+                                setLoading(false)
+                                openAlert(true,'Record updated!','#00e600');
 
-                                setTimeout(() => {
-                                    navigateHome()
-                                    setLoading(false)
-
-                                }, 2000);
+                             
                             });
-                    })
+                    },2000)
                 }
             );
 
@@ -106,6 +110,33 @@ const ItemScreen = ({ route }) => {
         }
     }
 
+    const ModalView = ({modalVisible,title}) => (
+    
+        <View style={styles.centeredView}>
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={modalVisible}
+          onRequestClose={() => {
+          }}>
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+        <Text style={styles.modalText}>{title}</Text>
+    
+              <TouchableHighlight
+                style={{ ...styles.openButton, backgroundColor: colorHeader }}
+                onPress={() => {
+                  setModalVisible(!modalVisible);
+                  navigation.navigate("Home");
+                }}>
+                <Text style={styles.textStyle}>Okay</Text>
+              </TouchableHighlight>
+            </View>
+          </View>
+        </Modal>
+      </View>
+    );
+    
 
     return (
         <ScrollView keyboardShouldPersistTaps='handled' contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}>
@@ -118,6 +149,8 @@ const ItemScreen = ({ route }) => {
                     color='#17202A'
                     visible={loading}
                 />
+                            <ModalView modalVisible={modalVisible} title={titleAlert}></ModalView>
+
                 <View style={{ padding: 25, flex: 5 }}>
                     <View style={{ flex: 1 }}>
                         <BackBtn onPress={navigateHome} />
@@ -141,6 +174,7 @@ const ItemScreen = ({ route }) => {
                             <TextInput
                                 style={styles.cellDesc}
                                 placeholder={description}
+                                multiline={true}
                                 onChangeText={description => setDesc(description)}
                                 defaultValue={description}
                             />                        
@@ -243,6 +277,57 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         backgroundColor: '#e6e6e6',
     },
+    container: {
+        flex: 1,
+        flexDirection: 'row',
+        padding: 10,
+        marginLeft: 16,
+        marginRight: 16,
+        marginTop: 8,
+        marginBottom: 8,
+        borderRadius: 5,
+        backgroundColor: '#FFF',
+        elevation: 2,
+    },
+    centeredView: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: 10,
+      },
+      modalView: {
+        margin: 10,
+        backgroundColor: 'white',
+        borderRadius: 10,
+        padding: 30,
+        width:200,
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: {
+          width: 0,
+          height: 4,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
+      },
+      openButton: {
+        backgroundColor: '#F194FF',
+        borderRadius: 20,
+        width:70,
+        padding: 10,
+        elevation: 2,
+      },
+      textStyle: {
+        color: 'white',
+        fontWeight: 'bold',
+        textAlign: 'center',
+      },
+      modalText: {
+        marginBottom: 15,
+        fontSize:16,
+        textAlign: 'center',
+      },
 });
 
 export default ItemScreen;

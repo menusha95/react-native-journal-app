@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { IconButton, Text, TextInput, Dimensions, View, StyleSheet, ScrollView, Button, Alert, TouchableOpacity, KeyboardAvoidingView } from 'react-native';
+import { IconButton, Text, TextInput, Modal, TouchableHighlight, Dimensions, View, StyleSheet, ScrollView, Button, Alert, TouchableOpacity, KeyboardAvoidingView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import firebase from '../../src/database/firebase';
 import AsyncStorage from '@react-native-community/async-storage';
@@ -16,7 +16,9 @@ const LoginScreen = () => {
     var isPassValid = false;
     const [loading, setLoading] = useState(false);
     const [isConnected, setIsConnected] = useState(false);
-
+    const [titleAlert, setTitleAlert] = useState('');
+    const [colorHeader, setColorHeader] = useState('');
+    const [modalVisible, setModalVisible] = useState(false);
 
 
     useEffect(() => {
@@ -34,22 +36,31 @@ const LoginScreen = () => {
         setIsConnected((await Network.getNetworkStateAsync()).isConnected);
     }
 
+    const openAlert = (open, title, color) => {
+        setModalVisible(open);
+        setTitleAlert(title);
+        setColorHeader(color)
+    }
+
     //validation for text input fields
     const validates = () => {
         if (!email.trim()) {
-            Alert.alert('Email required', 'Please enter your email!');
+            openAlert(true, 'Email required!', '#cc0000');
+
             return;
         } else {
             let reg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
             if (reg.test(email) === false) {
-                Alert.alert('Invalid email', 'Please enter a correct email!');
+                openAlert(true, 'Invalid email!', '#cc0000');
+
                 return false;
             } else {
                 isEmailValid = true;
             }
         }
         if (!password.trim()) {
-            Alert.alert('Password required', 'Please enter your password!');
+            openAlert(true, 'Password required!', '#cc0000');
+
             return;
         } else {
             isPassValid = true;
@@ -66,15 +77,17 @@ const LoginScreen = () => {
                         AsyncStorage.setItem('uid', uid);
                         setLoading(false);
 
-                        Alert.alert('Login Successful!', "Start using your journal")
-                        navigation.navigate("Home");
+                        openAlert(true, 'Login Successful!', '#00e600');
+                        setTimeout(() => {
+                            navigation.navigate("Home");
+                        }, 2000);
                     })
                     .catch(error => {
                         errorMessage:
                         setLoading(false);
 
                         setTimeout(() => {
-                            Alert.alert('Error!', error.message);
+                            openAlert(true, error.message, '#cc0000');
 
                         }, 700);
                     })
@@ -90,11 +103,42 @@ const LoginScreen = () => {
         navigation.navigate("Register");
     }
 
+    const ModalView = ({ modalVisible, title }) => (
+
+        <View style={styles.centeredView}>
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={modalVisible}
+                onRequestClose={() => {
+                }}>
+                <View style={styles.centeredView}>
+                    <View style={styles.modalView}>
+                        <Text style={styles.modalText}>{title}</Text>
+
+                        <TouchableHighlight
+                            style={{ ...styles.openButton, backgroundColor: colorHeader }}
+                            onPress={() => {
+                                setModalVisible(!modalVisible);
+                                //   navigation.navigate("Home");
+                            }}>
+                            <Text style={styles.textStyle}>Okay</Text>
+                        </TouchableHighlight>
+                    </View>
+                </View>
+            </Modal>
+        </View>
+    );
+
+
     return (
         <ScrollView keyboardShouldPersistTaps='handled' contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}>
             <KeyboardAvoidingView
                 behavior={Platform.OS == "ios" ? "padding" : "height"}
                 style={{ flex: 1 }} >
+
+
+                <ModalView modalVisible={modalVisible} title={titleAlert}></ModalView>
 
                 <View style={{ padding: 25, flex: 5 }}>
                     <View style={{ flex: 1 }} />
@@ -150,7 +194,7 @@ const LoginBtn = ({ onPress, title }) => (
 
 
 const RegisterBtn = ({ onPress, title }) => (
-    <TouchableOpacity onPress={onPress} style={styles.buttonContainer}>
+    <TouchableOpacity onPress={onPress} style={styles.buttonContainerReg}>
         <Text style={styles.buttonText}>{title}</Text>
     </TouchableOpacity>
 );
@@ -182,6 +226,13 @@ const styles = StyleSheet.create({
         height: 50,
         justifyContent: 'center'
     },
+    buttonContainerReg: {
+        elevation: 8,
+        backgroundColor: "#003d99",
+        borderRadius: 10,
+        height: 50,
+        justifyContent: 'center'
+    },
     buttonText: {
         fontSize: 16,
         color: "#ffffff",
@@ -200,6 +251,57 @@ const styles = StyleSheet.create({
         color: "#17202A",
         alignSelf: "center",
         justifyContent: 'center'
+    },
+    container: {
+        flex: 1,
+        flexDirection: 'row',
+        padding: 10,
+        marginLeft: 16,
+        marginRight: 16,
+        marginTop: 8,
+        marginBottom: 8,
+        borderRadius: 5,
+        backgroundColor: '#FFF',
+        elevation: 2,
+    },
+    centeredView: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: 10,
+    },
+    modalView: {
+        margin: 10,
+        backgroundColor: 'white',
+        borderRadius: 10,
+        padding: 30,
+        width: 200,
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 4,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
+    },
+    openButton: {
+        backgroundColor: '#F194FF',
+        borderRadius: 20,
+        width: 70,
+        padding: 10,
+        elevation: 2,
+    },
+    textStyle: {
+        color: 'white',
+        fontWeight: 'bold',
+        textAlign: 'center',
+    },
+    modalText: {
+        marginBottom: 15,
+        fontSize: 16,
+        textAlign: 'center',
     },
 });
 

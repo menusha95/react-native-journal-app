@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Text, TextInput, View, StyleSheet, Dimensions, Button, ScrollView, Alert, ActivityIndicator, TouchableOpacity, KeyboardAvoidingView, Image } from 'react-native';
+import { Text, TextInput, View, StyleSheet,Modal,TouchableHighlight,Dimensions, Button, ScrollView, Alert, ActivityIndicator, TouchableOpacity, KeyboardAvoidingView, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Asset } from 'expo-asset';
 import firebase from '../../src/database/firebase';
@@ -18,6 +18,9 @@ const RegisterScreen = () => {
     var isNameValid = false;
     var isEmailValid = false;
     var isPassValid = false;
+    const [titleAlert, setTitleAlert] = useState('');
+    const [colorHeader, setColorHeader] = useState('');
+    const [modalVisible, setModalVisible] = useState(false);
 
     useEffect(() => {
         const unsubscribe = navigation.addListener('focus', () => {
@@ -32,6 +35,12 @@ const RegisterScreen = () => {
         navigation.navigate("Login");
     }
 
+    const openAlert = (open,title,color) =>{
+        setModalVisible(open);
+            setTitleAlert(title);
+            setColorHeader(color)
+    }
+
     //check for internet connection
     const checkInternet = async () => {
         await Network.getNetworkStateAsync();
@@ -42,30 +51,35 @@ const RegisterScreen = () => {
     const validates = () => {
 
         if (!name.trim()) {
-            Alert.alert('Name required', 'Please enter your name!');
+            openAlert(true,'Name required!','#cc0000');
+
             return;
         } else {
             isNameValid = true;
         }
 
         if (!email.trim()) {
-            Alert.alert('Email required', 'Please enter your email!');
+            openAlert(true,'Email required!','#cc0000');
+
             return;
         } else {
             let reg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
             if (reg.test(email) === false) {
-                Alert.alert('Invalid email', 'Please enter a correct email!');
+                openAlert(true,'Invalid email!','#cc0000');
+
                 return false;
             } else {
                 isEmailValid = true;
             }
         }
         if (!password.trim()) {
-            Alert.alert('Password required', 'Please enter your password!');
+            openAlert(true,'Password required!','#cc0000');
+
             return;
         } else {
             if (password.length < 6) {
-                Alert.alert('Password too short!', 'Please enter a password more than 6 letters');
+                openAlert(true,'Password too short! Please enter a password more than 6 letters','#cc0000');
+
             } else {
                 isPassValid = true;
             }
@@ -81,19 +95,19 @@ const RegisterScreen = () => {
                             name: name
                         })
                         setLoading(false);
-
+                        openAlert(true,'Registration Successful! please login','#00e600');
                         setTimeout(() => {
-                            Alert.alert('Registration successful!', 'Please Login');
+                           
                             navigation.navigate("Login");
 
                         }, 2000);
                     })
                     .catch(error => {
-                        errorMessage: Alert.alert('Error!', error.message);
+                        openAlert(true,error.message,'#cc0000');
                     })
             }
         } else {
-            Alert.alert("No connection!", "Please connect to a working internet connection");
+            openAlert(true,'No connection!','#cc0000');
             navigation.navigate("Splash");
 
         }
@@ -102,6 +116,33 @@ const RegisterScreen = () => {
         //Do your stuff if condition meet.
     }
 
+    const ModalView = ({modalVisible,title}) => (
+    
+        <View style={styles.centeredView}>
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={modalVisible}
+          onRequestClose={() => {
+          }}>
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+        <Text style={styles.modalText}>{title}</Text>
+    
+              <TouchableHighlight
+                style={{ ...styles.openButton, backgroundColor: colorHeader }}
+                onPress={() => {
+                  setModalVisible(!modalVisible);
+                //   navigation.navigate("Home");
+                }}>
+                <Text style={styles.textStyle}>Okay</Text>
+              </TouchableHighlight>
+            </View>
+          </View>
+        </Modal>
+      </View>
+    );
+    
 
     return (
         <ScrollView keyboardShouldPersistTaps='handled' contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}>
@@ -115,6 +156,8 @@ const RegisterScreen = () => {
                     color='#17202A'
                     visible={loading}
                 />
+                                            <ModalView modalVisible={modalVisible} title={titleAlert}></ModalView>
+
                 <View style={{ padding: 25, flex: 5 }}>
                     <View style={{ flex: 1 }}>
                         <BackBtn onPress={navigateReg} />
@@ -199,7 +242,7 @@ const styles = StyleSheet.create({
     },
     buttonContainer: {
         elevation: 8,
-        backgroundColor: "#17202A",
+        backgroundColor: "#003d99",
         borderRadius: 10,
         height: 50,
         justifyContent: 'center'
@@ -215,6 +258,57 @@ const styles = StyleSheet.create({
         width: 40,
         height: 40
     },
+    container: {
+        flex: 1,
+        flexDirection: 'row',
+        padding: 10,
+        marginLeft: 16,
+        marginRight: 16,
+        marginTop: 8,
+        marginBottom: 8,
+        borderRadius: 5,
+        backgroundColor: '#FFF',
+        elevation: 2,
+    },
+    centeredView: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: 10,
+      },
+      modalView: {
+        margin: 10,
+        backgroundColor: 'white',
+        borderRadius: 10,
+        padding: 30,
+        width:200,
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: {
+          width: 0,
+          height: 4,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
+      },
+      openButton: {
+        backgroundColor: '#F194FF',
+        borderRadius: 20,
+        width:70,
+        padding: 10,
+        elevation: 2,
+      },
+      textStyle: {
+        color: 'white',
+        fontWeight: 'bold',
+        textAlign: 'center',
+      },
+      modalText: {
+        marginBottom: 15,
+        fontSize:16,
+        textAlign: 'center',
+      },
 });
 
 export default RegisterScreen;

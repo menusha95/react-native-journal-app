@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { IconButton, FlatList, ActivityIndicator, Text, Animated, Keyboard, TextInput, ScrollView, View, StyleSheet, Button, Image, Alert, TouchableOpacity, KeyboardAvoidingView } from 'react-native';
+import { IconButton, FlatList,Modal,TouchableHighlight, ActivityIndicator, Text, Animated, Keyboard, TextInput, ScrollView, View, StyleSheet, Button, Image, Alert, TouchableOpacity, KeyboardAvoidingView } from 'react-native';
 import { useNavigation, useIsFocused } from '@react-navigation/native';
 import firebase from '../../src/database/firebase';
 import CustomAlert from '../../src/pages/customAlert';
@@ -24,8 +24,8 @@ const HomeScreen = () => {
     const [isAlert, setIsAlert] = useState(false);
     const [userId, setUserId] = useState('');
     const [titleAlert, setTitleAlert] = useState('');
-    const [msgAlert, setMsgAlert] = useState('');
     const [colorHeader, setColorHeader] = useState('');
+    const [modalVisible, setModalVisible] = useState(false);
 
     //check for internet connection
     const checkInternet = async () => {
@@ -46,6 +46,7 @@ const HomeScreen = () => {
             year + ' ' + monthNames[month] + ' ' + date
 
         );
+
         return unsubscribe;
 
     }, [navigation]);
@@ -82,15 +83,17 @@ const HomeScreen = () => {
     //adding an item to the firestore databse
     const addItem = () => {
 
+
         if (!title.trim()) {
-            Alert.alert('Title required', 'Please enter a title!');
+            openAlert(true,'Title required!','#cc0000');
+           
             return;
         } else {
             isTitleValid = true;
         }
 
         if (!description.trim()) {
-            Alert.alert('Description required', 'Please enter a description!');
+            openAlert(true,'Description required!','#cc0000');
             return;
         } else {
             isDescValid = true;
@@ -117,7 +120,7 @@ const HomeScreen = () => {
             }
         } else {
             setLoading(false);
-            Alert.alert("No connection!", "Please connect to a working internet connection");
+            openAlert(true,'No connection!','#cc0000');
             navigation.navigate("Splash");
         }
     }
@@ -125,19 +128,21 @@ const HomeScreen = () => {
     const closeEdit = () => {
         setisEditClick(false);
         setIsAlert(false);
-
     }
 
     const openEdit = () => {
-        openAlert(true,'hiii','meyaaa','green');
+        // openAlert(true,'hiii','meyaaa','green');
         setisEditClick(true);
     }
 
-    const openAlert = (open,title,msg,color) =>{
-        setIsAlert(open);
-        setTitleAlert(title);
-        setMsgAlert(msg);
-        setColorHeader(color);
+    const closeAlert = (close) => {
+        setIsAlert(close);
+    }
+
+    const openAlert = (open,title,color) =>{
+        setModalVisible(open);
+            setTitleAlert(title);
+            setColorHeader(color)
     }
 
     const logOutClick = () => {
@@ -237,16 +242,37 @@ const HomeScreen = () => {
         </View>
     };
 
+    
+const ModalView = ({modalVisible,title}) => (
+    
+    <View style={styles.centeredView}>
+    <Modal
+      animationType="slide"
+      transparent={true}
+      visible={modalVisible}
+      onRequestClose={() => {
+      }}>
+      <View style={styles.centeredView}>
+        <View style={styles.modalView}>
+    <Text style={styles.modalText}>{title}</Text>
 
+          <TouchableHighlight
+            style={{ ...styles.openButton, backgroundColor: colorHeader }}
+            onPress={() => {
+              setModalVisible(!modalVisible);
+            }}>
+            <Text style={styles.textStyle}>Okay</Text>
+          </TouchableHighlight>
+        </View>
+      </View>
+    </Modal>
+  </View>
+);
 
 
     return (
         <View>
-            {isAlert ? (<CustomAlert modalVisible={true} titleAlert = {titleAlert} msgAlert ={msgAlert} colorHeader={colorHeader}></CustomAlert>) : (
-                <>
-                    <View />
-                </>
-            )}
+            <ModalView modalVisible={modalVisible} title={titleAlert}></ModalView>
             <FlatList
 
                 data={users}
@@ -264,9 +290,7 @@ const HomeScreen = () => {
                 ItemSeparatorComponent={ItemSeprator}
             />
         </View>
-
     );
-
 }
 
 //function to animate input view
@@ -311,13 +335,11 @@ const ShowAlert = ({ click }) => (
     </TouchableOpacity>
 );
 
-
 const ItemSeprator = () => <View style={{
     height: 7,
     width: "100%",
     backgroundColor: 'transparent'
 }} />
-
 
 const EditBtn = ({ onPress }) => (
     <TouchableOpacity onPress={onPress}>
@@ -438,7 +460,45 @@ const styles = StyleSheet.create({
         backgroundColor: '#FFF',
         elevation: 2,
     },
-
+    centeredView: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: 10,
+      },
+      modalView: {
+        margin: 10,
+        backgroundColor: 'white',
+        borderRadius: 10,
+        padding: 30,
+        width:200,
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: {
+          width: 0,
+          height: 4,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
+      },
+      openButton: {
+        backgroundColor: '#F194FF',
+        borderRadius: 20,
+        width:70,
+        padding: 10,
+        elevation: 2,
+      },
+      textStyle: {
+        color: 'white',
+        fontWeight: 'bold',
+        textAlign: 'center',
+      },
+      modalText: {
+        marginBottom: 15,
+        fontSize:16,
+        textAlign: 'center',
+      },
 
 
 });

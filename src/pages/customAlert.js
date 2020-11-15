@@ -10,7 +10,7 @@ import * as Network from 'expo-network';
 
 function CustomAlert(props) {
 
-    const [modalVisible, setModalVisible] = useState(props.modalVisible);
+    const [modalVisible, setModalVisible] = useState(true);
     const windowWidth = Dimensions.get('window').width;
     const windowHeight = Dimensions.get('window').height;
 
@@ -39,7 +39,7 @@ function CustomAlert(props) {
         <View style={{flexDirection:"row-reverse",margin:10}}>
           <TouchableOpacity style={{...styles.actions,backgroundColor:"#17202A"}} 
             onPress={() => {
-              setModalVisible(!modalVisible);
+              setModalVisible(false);
             }}>
             <Text style={styles.actionText}>Okay</Text>
           </TouchableOpacity>
