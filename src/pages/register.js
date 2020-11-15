@@ -172,7 +172,7 @@ const RegisterBtn = ({ onPress, title }) => (
 
 const BackBtn = ({ onPress }) => (
     <TouchableOpacity onPress={onPress}>
-        <View >
+        <View style={{paddingTop:20}} >
             <Image style={styles.backBtn} source={require('../../assets/back_click.png')} />
         </View>
     </TouchableOpacity>

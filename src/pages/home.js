@@ -13,8 +13,8 @@ const HomeScreen = () => {
     const [isEditClick, setisEditClick] = useState(false);
     const [currentDate, setCurrentDate] = useState('');
     const [users, setUsers] = useState([]); // Initial empty array of users
-    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
-        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const monthNames = ["January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"];
 
     const [loading, setLoading] = useState(false);
     var isTitleValid = false;
@@ -212,7 +212,6 @@ const HomeScreen = () => {
                                     <View style={styles.spacing} />
 
                                     <AddToJournalBtn title="Add to journal" onPress={addItem} />
-                                    <View style={styles.spacing} />
 
                                 </FadeInView>
 
@@ -268,7 +267,10 @@ const FadeInView = (props) => {
         <Animated.View                 // Special animatable View
             style={{
                 ...props.style,
-                opacity: fadeAnim,         // Bind opacity to animated value
+                opacity: fadeAnim,
+                padding:15,
+                borderRadius:10,
+                backgroundColor:'#e6e6e6'         // Bind opacity to animated value
             }}
         >
             {props.children}
@@ -293,15 +295,15 @@ const ItemSeprator = () => <View style={{
 const EditBtn = ({ onPress }) => (
     <TouchableOpacity onPress={onPress}>
         <View >
-            <Image style={styles.backBtn} source={require('../../assets/edit_icon.png')} />
+            <Image style={styles.backBtn} source={require('../../assets/add_icon.png')} />
         </View>
     </TouchableOpacity>
 );
 
 const LogoutBtn = ({ onPress }) => (
-    <TouchableOpacity onPress={onPress}>
-        <View >
-            <Image style={styles.backBtn} source={require('../../assets/log_out_icon.png')} />
+    <TouchableOpacity style={{paddingTop:5,paddingBottom:5}} onPress={onPress}>
+        <View  style={styles.logoutBtnText}>
+            <Text style={{color:'white'}}>Logout</Text>
         </View>
     </TouchableOpacity>
 );
@@ -334,6 +336,7 @@ const styles = StyleSheet.create({
         height: 100
     },
     textHeader: {
+        flex:1,
         fontSize: 35,
         fontWeight: "bold",
         color: '#17202A'
@@ -366,8 +369,16 @@ const styles = StyleSheet.create({
         fontWeight: "300",
     },
     backBtn: {
-        width: 40,
-        height: 40
+        width: 37,
+        height: 37
+    },
+    logoutBtnText: {
+       backgroundColor:'#17202A',
+       padding:5,
+       borderRadius:5,
+       flex:1,
+       justifyContent :'center'
+
     },
     buttonText: {
         fontSize: 16,

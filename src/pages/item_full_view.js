@@ -12,13 +12,14 @@ import AsyncStorage from '@react-native-community/async-storage';
 const ItemScreen = ({ route }) => {
 
     const navigation = useNavigation();
-    var title = route.params.item.title;
-    var description = route.params.item.description;
+
     var date = route.params.item.date;
     var key = route.params.item.key;
     const [loading, setLoading] = useState(false);
     const [isConnected, setIsConnected] = useState(false);
     const [userId, setUserId] = useState('');
+    const [title, setTitle] = useState(route.params.item.title);
+    const [description, setDesc] = useState(route.params.item.description);
 
     useEffect(() => {
         const unsubscribe = navigation.addListener('focus', () => {
@@ -70,6 +71,41 @@ const ItemScreen = ({ route }) => {
         }
     }
 
+    const editItem = () => {
+        setLoading(true)
+        if (isConnected) {
+            AsyncStorage.getItem('uid').then(
+                (value) => {
+                    setUserId(value)
+
+                    setTimeout(() => {
+                        firebase.firestore()
+                            .collection(value)
+                            .doc(key)
+                            .update(
+                                {
+                                    title: title,
+                                    description: description,
+                                }
+                            )
+                            .then(() => {
+                                Alert.alert("Record updated!", 'Record successfully updated!');
+
+                                setTimeout(() => {
+                                    navigateHome()
+                                    setLoading(false)
+
+                                }, 2000);
+                            });
+                    })
+                }
+            );
+
+        } else {
+            setLoading(false)
+        }
+    }
+
 
     return (
         <ScrollView keyboardShouldPersistTaps='handled' contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}>
@@ -88,16 +124,37 @@ const ItemScreen = ({ route }) => {
                         <View style={styles.spacing} />
                         <View style={styles.spacing} />
 
-                        <Text style={styles.cellTextDate}> {date}  </Text>
+                        <View style={styles.cellDateBack}>
+                            <Text style={styles.cellTextDate}> {date}  </Text>
+                        </View>
                         <View style={styles.spacing} />
 
-                        <Text style={styles.cellText}> {title}  </Text>
+                        <TextInput
+                            style={styles.cellText}
+                            placeholder={title}
+                            onChangeText={title => setTitle(title)}
+                            defaultValue={title}
+                        />
                         <View style={styles.spacing} />
 
-                        <Text style={styles.cellDesc}> {description}  </Text>
+                        <View style={styles.cellDescBack}>
+                            <TextInput
+                                style={styles.cellDesc}
+                                placeholder={description}
+                                onChangeText={description => setDesc(description)}
+                                defaultValue={description}
+                            />                        
+                            </View>
                         <View style={styles.spacing} />
                         <View style={styles.spacing} />
+                        <View style={{ flexDirection: 'row', justifyContent:'space-evenly'}}>
                         <DeleteBtn title="Delete record" onPress={deleteItem}></DeleteBtn>
+                        <View style={styles.spacing} />
+
+                        <UpdateBtn title="Update record" onPress={editItem}></UpdateBtn>
+
+                            </View>
+                        <View style={styles.spacing} />
                     </View>
                 </View>
             </KeyboardAvoidingView>
@@ -109,7 +166,7 @@ const ItemScreen = ({ route }) => {
 
 const BackBtn = ({ onPress }) => (
     <TouchableOpacity onPress={onPress}>
-        <View >
+        <View style={{ paddingTop: 20 }} >
             <Image style={styles.backBtn} source={require('../../assets/back_click.png')} />
         </View>
     </TouchableOpacity>
@@ -118,6 +175,11 @@ const BackBtn = ({ onPress }) => (
 
 const DeleteBtn = ({ onPress, title }) => (
     <TouchableOpacity onPress={onPress} style={styles.buttonContainer}>
+        <Text style={styles.buttonText}>{title}</Text>
+    </TouchableOpacity>
+);
+const UpdateBtn = ({ onPress, title }) => (
+    <TouchableOpacity onPress={onPress} style={styles.buttonContainerUpdate}>
         <Text style={styles.buttonText}>{title}</Text>
     </TouchableOpacity>
 );
@@ -130,10 +192,19 @@ const styles = StyleSheet.create({
     },
     buttonContainer: {
         elevation: 8,
-        backgroundColor: "#17202A",
+        backgroundColor: "#cc0000",
         borderRadius: 10,
         height: 50,
-        justifyContent: 'center'
+        justifyContent: 'center',
+        flex:1
+    },
+    buttonContainerUpdate: {
+        elevation: 8,
+        backgroundColor: "#002966",
+        borderRadius: 10,
+        height: 50,
+        justifyContent: 'center',
+        flex:1
     },
     buttonText: {
         fontSize: 16,
@@ -153,13 +224,24 @@ const styles = StyleSheet.create({
     },
     cellTextDate: {
         fontSize: 16,
-        color: "#17202A",
+        color: "#FFF",
         fontWeight: "300",
+    },
+    cellDateBack: {
+        padding: 5,
+        borderRadius: 5,
+        backgroundColor: '#17202A',
+        alignSelf: 'flex-start'
     },
     cellDesc: {
         fontSize: 20,
         color: "#17202A",
         fontWeight: "normal",
+    },
+    cellDescBack: {
+        padding: 5,
+        borderRadius: 5,
+        backgroundColor: '#e6e6e6',
     },
 });
 
