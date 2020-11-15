@@ -9,7 +9,14 @@ To install using expo-cient
 ```sh
 $ npm install --global expo-cli
 ```
-to run the app
+to run the environment
 ```sh
 $ expo start
 ```
+to run in a device
+```sh
+Download Expo Client app from Play Store or App Store
+```
+Scan the QR
+
+
