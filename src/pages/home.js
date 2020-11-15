@@ -50,26 +50,26 @@ const HomeScreen = () => {
     const getUserFire = () => {
         AsyncStorage.getItem('uid').then(
             (value) => {
-               setUserId(value)
-               
-              setTimeout(() => {
-                firebase.firestore()
-                .collection(value)
-                .get()
-                .then(querySnapshot => {
-                    const users = [];
-                    querySnapshot.forEach(documentSnapshot => {
-                        //adding items to users array
-                        users.push({
-                            ...documentSnapshot.data(),
-                            key: documentSnapshot.id,
-                        });
-                    });
-                    setUsers(users);
-                    setLoading(false);
-    
-                },2000);
-              })
+                setUserId(value)
+
+                setTimeout(() => {
+                    firebase.firestore()
+                        .collection(value)
+                        .get()
+                        .then(querySnapshot => {
+                            const users = [];
+                            querySnapshot.forEach(documentSnapshot => {
+                                //adding items to users array
+                                users.push({
+                                    ...documentSnapshot.data(),
+                                    key: documentSnapshot.id,
+                                });
+                            });
+                            setUsers(users);
+                            setLoading(false);
+
+                        }, 2000);
+                })
             }
         );
     }
@@ -151,100 +151,100 @@ const HomeScreen = () => {
             return false;
         }
     }
+    const getHeader = () => {
+        return <View>
+            <Spinner
+                color='#17202A'
+                visible={loading}
+            />
+            <View style={{ padding: 25, flex: 4 }}>
+                <View style={{ flex: 3 }}>
+                    <View style={styles.spacing} />
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                        <Text style={styles.textHeader}>
+                            My Journal</Text>
 
-    return (
-        <ScrollView nestedScrollEnabled={true} keyboardShouldPersistTaps='handled' contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}>
-
-            <KeyboardAvoidingView
-                behavior={Platform.OS == "ios" ? "padding" : "height"}
-                style={{ flex: 1 }} >
-                <Spinner
-                    color='#17202A'
-                    visible={loading}
-                />
-                <View style={{ padding: 25, flex: 4 }}>
-                    <View style={{ flex: 3 }}>
-                        <View style={styles.spacing} />
-                        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                            <Text style={styles.textHeader}>
-                                My journal</Text>
-
-                            <LogoutBtn onPress={logOutClick} />
-                        </View>
+                        <LogoutBtn onPress={logOutClick} />
+                    </View>
 
 
-                        <View style={styles.spacing} />
-                        
-                        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                            <Text style={styles.text}>Add items to journal</Text>
-                            
-                            {isEditClick ? (
-                                <CloseBtn onPress={closeEdit} />
+                    <View style={styles.spacing} />
 
-                            ) : (
-                                    <>
-                                        <EditBtn onPress={openEdit} />
-                                    </>
-                                )}
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                        <Text style={styles.text}>Add items to Journal</Text>
 
-                        </View>
+                        {isEditClick ? (
+                            <CloseBtn onPress={closeEdit} />
 
-                        <View style={styles.spacing} />
-
-                        {!isEditClick ? (
-                            <View />
                         ) : (
                                 <>
-                                    <FadeInView style={{ flex: 1 }}>
-                                        <Text style={styles.textDate}>{currentDate}</Text>
-                                        <View style={styles.spacing} />
-
-                                        <TextInput
-                                            style={styles.textInput}
-                                            placeholder="Title"
-                                            onChangeText={title => setTitle(title)}
-                                            defaultValue={title}
-                                        />
-                                        <View style={styles.spacing} />
-
-                                        <TextInput
-                                            style={styles.textInputMultiline}
-                                            placeholder="Start Writing.."
-                                            multiline={true}
-                                            onChangeText={description => setDesc(description)}
-                                            defaultValue={description}
-                                        />
-                                        <View style={styles.spacing} />
-
-                                        <AddToJournalBtn title="Add to journal" onPress={addItem} />
-                                        <View style={styles.spacing} />
-
-                                    </FadeInView>
-
+                                    <EditBtn onPress={openEdit} />
                                 </>
                             )}
-                        <FlatList
-                            data={users}
-                            renderItem={({ item }) => (
-                                <TouchableOpacity style={styles.cellContainer} onPress={getDataJournal.bind(this, item)}>
-                                    <View style={{ height: 60, flex: 1, padding: 10, justifyContent: 'center' }}>
-                                        <Text style={styles.cellText} >{item.title}</Text>
-                                        <Text style={styles.cellTextDate} >{item.date}</Text>
-                                    </View>
-                                </TouchableOpacity>
-                            )}
-                            keyExtractor={(item, index) => {
-                                return item.key;
-                            }}
-                            ItemSeparatorComponent={ItemSeprator}
-
-                        />
 
                     </View>
-                    <View style={{ flex: 1 }}></View>
+
+                    <View style={styles.spacing} />
+
+                    {!isEditClick ? (
+                        <View />
+                    ) : (
+                            <>
+                                <FadeInView style={{ flex: 1 }}>
+                                    <Text style={styles.textDate}>{currentDate}</Text>
+                                    <View style={styles.spacing} />
+
+                                    <TextInput
+                                        style={styles.textInput}
+                                        placeholder="Title"
+                                        onChangeText={title => setTitle(title)}
+                                        defaultValue={title}
+                                    />
+                                    <View style={styles.spacing} />
+
+                                    <TextInput
+                                        style={styles.textInputMultiline}
+                                        placeholder="Start Writing.."
+                                        multiline={true}
+                                        onChangeText={description => setDesc(description)}
+                                        defaultValue={description}
+                                    />
+                                    <View style={styles.spacing} />
+
+                                    <AddToJournalBtn title="Add to journal" onPress={addItem} />
+                                    <View style={styles.spacing} />
+
+                                </FadeInView>
+
+                            </>
+                        )}
                 </View>
-            </KeyboardAvoidingView>
-        </ScrollView>
+                <View style={{ flex: 1 }}></View>
+            </View>
+        </View>
+    };
+
+
+
+
+    return (
+
+        <FlatList
+        
+            data={users}
+            renderItem={({ item }) => (
+                <View style={{ paddingLeft: 25, paddingRight: 25 }}>
+                    <TouchableOpacity style={styles.cellContainer} onPress={getDataJournal.bind(this, item)}>
+                        <View style={{ height: 60, flex: 1, padding: 10, justifyContent: 'center' }}>
+                            <Text style={styles.cellText} >{item.title}</Text>
+                            <Text style={styles.cellTextDate} >{item.date}</Text>
+                        </View>
+                    </TouchableOpacity>
+                </View>
+            )}
+            ListHeaderComponent={getHeader()}
+            ItemSeparatorComponent={ItemSeprator}
+        />
     );
 
 }
@@ -353,7 +353,7 @@ const styles = StyleSheet.create({
         elevation: 8,
         backgroundColor: "#17202A",
         borderRadius: 10,
-        height: 100,
+        height: 110,
     },
     cellText: {
         fontSize: 28,
