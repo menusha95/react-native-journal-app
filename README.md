@@ -3,10 +3,9 @@ A React-native based journal app developed using firebase-firestore database.
 
 To install using expo-cient
 ```sh
-$ yarn add expo
+$ npm install --global expo-cli
 ```
-or
+to run the app
 ```sh
-$ npm add expo
+$ expo start
 ```
-
