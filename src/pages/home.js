@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { IconButton, FlatList, ActivityIndicator, Text, Animated, Keyboard, TextInput, ScrollView, View, StyleSheet, Button, Image, Alert, TouchableOpacity, KeyboardAvoidingView } from 'react-native';
 import { useNavigation, useIsFocused } from '@react-navigation/native';
 import firebase from '../../src/database/firebase';
+import CustomAlert from '../../src/pages/customAlert';
 import AsyncStorage from '@react-native-community/async-storage';
 import Spinner from 'react-native-loading-spinner-overlay';
 import * as Network from 'expo-network';
@@ -20,7 +21,11 @@ const HomeScreen = () => {
     var isTitleValid = false;
     var isDescValid = false;
     const [isConnected, setIsConnected] = useState(false);
+    const [isAlert, setIsAlert] = useState(false);
     const [userId, setUserId] = useState('');
+    const [titleAlert, setTitleAlert] = useState('');
+    const [msgAlert, setMsgAlert] = useState('');
+    const [colorHeader, setColorHeader] = useState('');
 
     //check for internet connection
     const checkInternet = async () => {
@@ -119,11 +124,20 @@ const HomeScreen = () => {
 
     const closeEdit = () => {
         setisEditClick(false);
+        setIsAlert(false);
 
     }
 
     const openEdit = () => {
+        openAlert(true,'hiii','meyaaa','green');
         setisEditClick(true);
+    }
+
+    const openAlert = (open,title,msg,color) =>{
+        setIsAlert(open);
+        setTitleAlert(title);
+        setMsgAlert(msg);
+        setColorHeader(color);
     }
 
     const logOutClick = () => {
@@ -227,23 +241,30 @@ const HomeScreen = () => {
 
 
     return (
-
-        <FlatList
-        
-            data={users}
-            renderItem={({ item }) => (
-                <View style={{ paddingLeft: 25, paddingRight: 25 }}>
-                    <TouchableOpacity style={styles.cellContainer} onPress={getDataJournal.bind(this, item)}>
-                        <View style={{ height: 60, flex: 1, padding: 10, justifyContent: 'center' }}>
-                            <Text style={styles.cellText} >{item.title}</Text>
-                            <Text style={styles.cellTextDate} >{item.date}</Text>
-                        </View>
-                    </TouchableOpacity>
-                </View>
+        <View>
+            {isAlert ? (<CustomAlert modalVisible={true} titleAlert = {titleAlert} msgAlert ={msgAlert} colorHeader={colorHeader}></CustomAlert>) : (
+                <>
+                    <View />
+                </>
             )}
-            ListHeaderComponent={getHeader()}
-            ItemSeparatorComponent={ItemSeprator}
-        />
+            <FlatList
+
+                data={users}
+                renderItem={({ item }) => (
+                    <View style={{ paddingLeft: 25, paddingRight: 25 }}>
+                        <TouchableOpacity style={styles.cellContainer} onPress={getDataJournal.bind(this, item)}>
+                            <View style={{ height: 60, flex: 1, padding: 10, justifyContent: 'center' }}>
+                                <Text style={styles.cellText} >{item.title}</Text>
+                                <Text style={styles.cellTextDate} >{item.date}</Text>
+                            </View>
+                        </TouchableOpacity>
+                    </View>
+                )}
+                ListHeaderComponent={getHeader()}
+                ItemSeparatorComponent={ItemSeprator}
+            />
+        </View>
+
     );
 
 }
@@ -268,9 +289,9 @@ const FadeInView = (props) => {
             style={{
                 ...props.style,
                 opacity: fadeAnim,
-                padding:15,
-                borderRadius:10,
-                backgroundColor:'#e6e6e6'         // Bind opacity to animated value
+                padding: 15,
+                borderRadius: 10,
+                backgroundColor: '#e6e6e6'         // Bind opacity to animated value
             }}
         >
             {props.children}
@@ -279,6 +300,12 @@ const FadeInView = (props) => {
 }
 
 const AddToJournalBtn = ({ onPress, title }) => (
+    <TouchableOpacity onPress={onPress} style={styles.buttonContainer}>
+        <Text style={styles.buttonText}>{title}</Text>
+    </TouchableOpacity>
+);
+
+const ShowAlert = ({ click }) => (
     <TouchableOpacity onPress={onPress} style={styles.buttonContainer}>
         <Text style={styles.buttonText}>{title}</Text>
     </TouchableOpacity>
@@ -301,9 +328,9 @@ const EditBtn = ({ onPress }) => (
 );
 
 const LogoutBtn = ({ onPress }) => (
-    <TouchableOpacity style={{paddingTop:5,paddingBottom:5}} onPress={onPress}>
-        <View  style={styles.logoutBtnText}>
-            <Text style={{color:'white'}}>Logout</Text>
+    <TouchableOpacity style={{ paddingTop: 5, paddingBottom: 5 }} onPress={onPress}>
+        <View style={styles.logoutBtnText}>
+            <Text style={{ color: 'white' }}>Logout</Text>
         </View>
     </TouchableOpacity>
 );
@@ -336,7 +363,7 @@ const styles = StyleSheet.create({
         height: 100
     },
     textHeader: {
-        flex:1,
+        flex: 1,
         fontSize: 35,
         fontWeight: "bold",
         color: '#17202A'
@@ -373,11 +400,11 @@ const styles = StyleSheet.create({
         height: 37
     },
     logoutBtnText: {
-       backgroundColor:'#17202A',
-       padding:5,
-       borderRadius:5,
-       flex:1,
-       justifyContent :'center'
+        backgroundColor: '#cc0000',
+        padding: 5,
+        borderRadius: 5,
+        flex: 1,
+        justifyContent: 'center'
 
     },
     buttonText: {
